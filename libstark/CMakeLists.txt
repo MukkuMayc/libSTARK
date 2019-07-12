@@ -24,7 +24,7 @@ set(CMAKE_CXX_STANDARD 11)
 # include_directories(src/reductions/BairToAcsp/Routing)
 # include_directories(src/common/Infrastructure)
 
-set(LIBS algebralib fft simde myfunctions)
+set(LIBS algebralib fft simde)
 
 add_library(${PROJECT_NAME}
         src/common/Algebra/FieldElementPredicate.hpp
@@ -154,4 +154,3 @@ target_include_directories(${PROJECT_NAME} PUBLIC src/reductions/BairToAcsp/Rout
 
 
 target_link_libraries(${PROJECT_NAME}  ${LIBS})
-# target_link_libraries(${PROJECT_NAME}  algebralib)

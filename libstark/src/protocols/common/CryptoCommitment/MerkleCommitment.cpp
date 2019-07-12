@@ -5,14 +5,9 @@
 #include <string>
 #include <algebraLib/FieldElement.hpp>
 #include <iomanip>
-#include <wmmintrin.h>
 
-#ifdef WIN32
-#include <emmintrin.h>
-#endif	// #ifdef WIN32
-#ifdef __GNUC__
-#include <x86intrin.h>
-#endif	// #ifdef __GNUC__
+#include "ssse3.h"
+#include "aes_functions.cpp"
 
 namespace libstark{
 namespace Protocols{
@@ -24,55 +19,66 @@ using std::vector;
 namespace{
     //macros
 
-#define AES_128_key_exp(k, rcon) aes_128_key_expansion(k, _mm_aeskeygenassist_si128(k, rcon))
+#define AES_128_key_exp(k, rcon) aes_128_key_expansion(k, _My_aeskeygenassist_si128(k, rcon))
 
-
-static __m128i aes_128_key_expansion(__m128i key, __m128i keygened){
-    keygened = _mm_shuffle_epi32(keygened, _MM_SHUFFLE(3,3,3,3));
-    key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
-    key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
-    key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
-    return _mm_xor_si128(key, keygened);
+static simde__m128i aes_128_key_expansion(simde__m128i key, simde__m128i keygened){
+    keygened = simde_mm_shuffle_epi32(keygened, _MM_SHUFFLE(3,3,3,3));
+    key = simde_mm_xor_si128(key, simde_mm_slli_si128(key, 4));
+    key = simde_mm_xor_si128(key, simde_mm_slli_si128(key, 4));
+    key = simde_mm_xor_si128(key, simde_mm_slli_si128(key, 4));
+    return simde_mm_xor_si128(key, keygened);
 }
 
 //encrypts the data
-inline __m128i aes128_enc(const __m128i& data, const __m128i& enc_key){
-    __m128i m  = data;
+inline simde__m128i aes128_enc(const simde__m128i& data, const simde__m128i& enc_key){
+    __uint128_t m = *(__uint128_t*)&data;
     
-    __m128i k0 = enc_key;
-    m = _mm_xor_si128       (m, k0);
+    simde__m128i k0 = enc_key;
+
+    auto temp = simde_mm_xor_si128(*(simde__m128i*)&m, k0);
+    m = *(__uint128_t*)&temp;   
+
+    __uint128_t keygened = _My_aeskeygenassist_si128(*(__uint128_t*)&k0, 0x01);
+    simde__m128i k1  = aes_128_key_expansion(k0, *(simde__m128i*)&keygened);
+    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k1);
     
-    __m128i k1  = AES_128_key_exp(k0, 0x01);
-    m = _mm_aesenc_si128    (m, k1);
+    keygened = _My_aeskeygenassist_si128(*(__uint128_t*)&k1, 0x02);
+    simde__m128i k2  = aes_128_key_expansion(k1, *(simde__m128i*)&keygened);
+    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k2);
     
-    __m128i k2  = AES_128_key_exp(k1, 0x02);
-    m = _mm_aesenc_si128    (m, k2);
+    keygened = _My_aeskeygenassist_si128(*(__uint128_t*)&k2, 0x04);
+    simde__m128i k3  = aes_128_key_expansion(k2, *(simde__m128i*)&keygened);
+    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k3);
     
-    __m128i k3  = AES_128_key_exp(k2, 0x04);
-    m = _mm_aesenc_si128    (m, k3);
+    keygened = _My_aeskeygenassist_si128(*(__uint128_t*)&k3, 0x08);
+    simde__m128i k4  = aes_128_key_expansion(k3, *(simde__m128i*)&keygened);
+    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k4);
     
-    __m128i k4  = AES_128_key_exp(k3, 0x08);
-    m = _mm_aesenc_si128    (m, k4);
+    keygened = _My_aeskeygenassist_si128(*(__uint128_t*)&k4, 0x10);
+    simde__m128i k5  = aes_128_key_expansion(k4, *(simde__m128i*)&keygened);
+    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k5);
     
-    __m128i k5  = AES_128_key_exp(k4, 0x10);
-    m = _mm_aesenc_si128    (m, k5);
+    keygened = _My_aeskeygenassist_si128(*(__uint128_t*)&k5, 0x20);
+    simde__m128i k6  = aes_128_key_expansion(k5, *(simde__m128i*)&keygened);
+    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k6);
     
-    __m128i k6  = AES_128_key_exp(k5, 0x20);
-    m = _mm_aesenc_si128    (m, k6);
+    keygened = _My_aeskeygenassist_si128(*(__uint128_t*)&k6, 0x40);
+    simde__m128i k7  = aes_128_key_expansion(k6, *(simde__m128i*)&keygened);
+    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k7);
     
-    __m128i k7  = AES_128_key_exp(k6, 0x40);
-    m = _mm_aesenc_si128    (m, k7);
+    keygened = _My_aeskeygenassist_si128(*(__uint128_t*)&k7, 0x80);
+    simde__m128i k8  = aes_128_key_expansion(k7, *(simde__m128i*)&keygened);
+    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k8);
     
-    __m128i k8  = AES_128_key_exp(k7, 0x80);
-    m = _mm_aesenc_si128    (m, k8);
+    keygened = _My_aeskeygenassist_si128(*(__uint128_t*)&k8, 0x1B);
+    simde__m128i k9  = aes_128_key_expansion(k8, *(simde__m128i*)&keygened);
+    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k9);
     
-    __m128i k9  = AES_128_key_exp(k8, 0x1B);
-    m = _mm_aesenc_si128    (m, k9);
+    keygened = _My_aeskeygenassist_si128(*(__uint128_t*)&k9, 0x36);
+    simde__m128i k10  = aes_128_key_expansion(k9, *(simde__m128i*)&keygened);
+    _My_aesenclast_si128((uint8_t*)&m, (uint8_t*)&k10);
     
-    __m128i k10  = AES_128_key_exp(k9, 0x36);
-    m = _mm_aesenclast_si128(m, k10);
-    
-    return m;
+    return *(simde__m128i*)&m;
 }
 }
 
@@ -92,11 +98,11 @@ void hash(void const* const src, void * const dst){
     //Code for AES-128 based hash
     //
     
-    const __m128i key = _mm_loadu_si128((__m128i*)src);
-    const __m128i plaintext = _mm_loadu_si128(((__m128i*)src)+1);
-    const __m128i encRes = aes128_enc(plaintext, key);
+    const simde__m128i key = simde_mm_loadu_si128((simde__m128i*)src);
+    const simde__m128i plaintext = simde_mm_loadu_si128(((simde__m128i*)src)+1);
+    const simde__m128i encRes = aes128_enc(plaintext, key);
 
-    _mm_storeu_si128((__m128i*)dst, _mm_xor_si128(encRes,plaintext));
+    simde_mm_storeu_si128((simde__m128i*)dst, simde_mm_xor_si128(encRes,plaintext));
 }
 
 hashDigest_t hash(void const* const src){

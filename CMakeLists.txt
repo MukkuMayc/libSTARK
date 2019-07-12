@@ -33,11 +33,10 @@ set(TINYRAM_TESTS_DIR ${PROJECT_SOURCE_DIR}/tinyram/stark-tinyram-tests)
 
 #END
 
-set(LIBS gadgetlib fft algebralib libstark simde myfunctions)
+set(LIBS gadgetlib fft algebralib libstark simde)
 set(TESTS algebralib-tests libstark-tests stark-tinyram-tests)
 
 add_subdirectory(${SIMDE_DIR} bin/simde)
-add_subdirectory(${MYFUNCTIONS_DIR} bin/MyFunctions)
 add_subdirectory(${FFTLIB_DIR} bin/fftlib)
 add_subdirectory(${ALGEBRALIB_DIR} bin/algebralib)
 add_subdirectory(${LIBSTARK_DIR} bin/libstark)

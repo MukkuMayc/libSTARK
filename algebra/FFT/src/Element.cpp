@@ -8,13 +8,13 @@
  * SSE SUPPORT
  */
 
-#ifdef WIN32
-#include <wmmintrin.h>
-//#include <emmintrin.h>
-#endif	// #ifdef WIN32
-#ifdef __GNUC__
-#include <x86intrin.h>
-#endif	// #ifdef __GNUC__
+// #ifdef WIN32
+// #include <wmmintrin.h>
+// //#include <emmintrin.h>
+// #endif	// #ifdef WIN32
+// #ifdef __GNUC__
+// #include <x86intrin.h>
+//#endif	// #ifdef __GNUC__
 #include <stdint.h>
 #include <stdint.h>
 #include <bitset>
@@ -25,6 +25,11 @@
 #include "Definitions.h"
 #include <bitset>
 #include <iostream>
+
+#include "sse2.h"
+#include "ssse3.h"
+#include "clmul.cpp"
+
 FFF::Element c_mulXorAux;
 namespace FFF {
 #ifdef WIN32 //TODO
@@ -38,10 +43,10 @@ namespace FFF {
 #define _mm_set1_epi64(x) {AS_8CHARS(x), AS_8CHARS(x)}
 #endif
 #ifdef WIN32
- __m128i mask = {-1,-1,-1,-1,-1,-1,-1,-1};
+ simde__m128i mask = {-1,-1,-1,-1,-1,-1,-1,-1};
 #endif // #ifdef WIN32
 #ifdef __GNUC__
-       __m128i mask = { (long long int)0b1111111111111111111111111111111111111111111111111111111111111111, 0 };
+       simde__m128i mask = { (long long int)0b1111111111111111111111111111111111111111111111111111111111111111, 0 };
 #endif // #ifdef __GNUC__
 const idx_t Element::irr_poly_index[][max_nonzero_coefs_in_mod]={
 			{0,(long long unsigned int)-1,(long long unsigned int)-1},
@@ -118,14 +123,11 @@ void Element::generateOrdElement(Element* e){
 
 inline void Element::clmulXor(const cell_t* a,const  cell_t* b, cell_t* res)
 {
-	_mm_storeu_si128((__m128i*)res,
-			_mm_xor_si128(
-					*((__m128i*)a),
-					_mm_clmulepi64_si128(
-							_mm_loadu_si128((__m128i*)a),
-							_mm_loadu_si128((__m128i*)b),
-							0
-							)
+	__uint128_t temp = _My_clmul(*(__int128*)a, *(__int128*)b, 0);
+	simde_mm_storeu_si128((simde__m128i*)res,
+			simde_mm_xor_si128(
+					*((simde__m128i*)a),
+					*(simde__m128i*)temp
 			)
 	);
 //	register __m128i v1,v2;
@@ -133,14 +135,17 @@ inline void Element::clmulXor(const cell_t* a,const  cell_t* b, cell_t* res)
 //	ui64_m128i(v2,(const unsigned long*)b);
 //	m128i_ui64((unsigned long*)res,_mm_clmulepi64_si128(v1,v2,0));
 }
-inline void Element::clmul(const cell_t* a,const  cell_t* b, cell_t* res)
-{
-			_mm_clmulepi64_si128(
-					_mm_loadu_si128((__m128i*)a),
-					_mm_loadu_si128((__m128i*)b),
-					0
-			);
-}
+
+//CODE COMMENTED BY ME
+// inline void Element::clmul(const cell_t* a,const  cell_t* b, cell_t* res)
+// {
+// 			*(simde__m128i*)&_My_clmul(
+// 					*(__int128*)a,
+// 					*(__int128*)b,
+// 					0
+// 			);
+// }
+
 /*
  * CPU Operations
  */
@@ -175,8 +180,8 @@ const char lookupTable1[] = {0x0,0x1b,0x2d,0x36,0x5a,0x41,0x77,0x6c};
 //a[i] = a[i] + c[i]
 //THIS CODE IS IRREDUCIBLE SPECIFIC!!!
 void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const int len){
-		register __m128i factor_reg = _mm_set1_epi64(*((__m64*)(&factor)));
-		register __m128i lookup_reg = _mm_loadl_epi64((__m128i*)lookupTable1);
+		register simde__m128i factor_reg = simde_mm_set1_epi64(*((simde__m64*)(&factor)));
+		register simde__m128i lookup_reg = simde_mm_loadl_epi64((simde__m128i*)lookupTable1);
         
 
 
@@ -197,7 +202,7 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
              */
 
             // Load a[0] and a[1]
-            __m128i a_vec = _mm_loadu_si128((__m128i*)(&a[currIdx]));
+            simde__m128i a_vec = simde_mm_loadu_si128((simde__m128i*)(&a[currIdx]));
             
             // Compute factor * a[i] for both i=0,1
             // This multiplication is done as binary polynomials,
@@ -212,9 +217,10 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             // t0[128:64] = (factor * a[0]) div x^64
             // t1[ 64: 0] = (factor * a[1]) mod x^64
             // t1[128:64] = (factor * a[1]) div x^64
-            __m128i t0, t1;
-            t0=_mm_clmulepi64_si128(a_vec, factor_reg, 0);
-            t1=_mm_clmulepi64_si128(a_vec, factor_reg, 1);
+
+            simde__m128i t0, t1;
+            *(__uint128_t*)&t0 = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 0);
+            *(__uint128_t*)&t1 = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 1);
 
             // Split the products to modular reminders and offsets:
             // xmmRes   [ 64: 0] = (factor * a[0]) mod x^64
@@ -224,17 +230,17 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             //
             // Important note : notice the degree of xmmCarry0[ 64: 0] and xmmCarry0[128:64]
             // is at most (63+63)-64 = 62
-            __m128i xmmRes, xmmCarry0, xmmCarry00, xmmCarry01, xmmCarry1;
-            xmmRes = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(t0),_mm_castsi128_pd(t1),0));
-            xmmCarry0 = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(t0),_mm_castsi128_pd(t1),1|2));
+            simde__m128i xmmRes, xmmCarry0, xmmCarry00, xmmCarry01, xmmCarry1;
+            xmmRes = simde_mm_castpd_si128(simde_mm_shuffle_pd(simde_mm_castsi128_pd(t0),simde_mm_castsi128_pd(t1),0));
+            xmmCarry0 = simde_mm_castpd_si128(simde_mm_shuffle_pd(simde_mm_castsi128_pd(t0),simde_mm_castsi128_pd(t1),1|2));
 
             // xmmCarry00[ 64: 0] = ( ( (factor * a[0]) div x^64 ) * ( 1 + x ) ) (mod x^64)
             // xmmCarry00[128:64] = ( ( (factor * a[1]) div x^64 ) * ( 1 + x ) ) (mod x^64)
-            xmmCarry00 = _mm_xor_si128(xmmCarry0,_mm_slli_epi64(xmmCarry0,1));
+            xmmCarry00 = simde_mm_xor_si128(xmmCarry0,simde_mm_slli_epi64(xmmCarry0,1));
             
             // xmmCarry01[ 64: 0] = ( ( (factor * a[0]) div x^64 ) * ( x^3 + x^4 ) ) (mod x^64)
             // xmmCarry01[128:64] = ( ( (factor * a[1]) div x^64 ) * ( x^3 + x^4 ) ) (mod x^64)
-            xmmCarry01 = _mm_xor_si128(_mm_slli_epi64(xmmCarry0,3),_mm_slli_epi64(xmmCarry0,4));
+            xmmCarry01 = simde_mm_xor_si128(simde_mm_slli_epi64(xmmCarry0,3),simde_mm_slli_epi64(xmmCarry0,4));
             
             // xmmCarry1[ 64: 0] = ( ( (factor * a[0]) div x^64 ) * ( 1 + x + x^3 + x^4 ) ) (div x^64)
             // xmmCarry1[128:64] = ( ( (factor * a[1]) div x^64 ) * ( 1 + x + x^3 + x^4 ) ) (div x^64)
@@ -242,7 +248,7 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             // Important note : notice the degree of xmmCarry1[ 64: 0] and xmmCarry1[128:64]
             // is at most (62+4)-64 = 2.
             // In particular, their support is only in their 3 least significant bits.
-            xmmCarry1 = _mm_srli_epi64(xmmCarry0,60);
+            xmmCarry1 = simde_mm_srli_epi64(xmmCarry0,60);
            
             // We use the fact the degree of either xmmCarr1[ 64: 0] and xmmCarry1[128:64] is at most 2,
             // thus there are only 8 possibilities for each polynomial.
@@ -253,7 +259,7 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             //
             // xmmCarry1[ 64: 0] = ( ( ( (factor * a[0]) div x^64 ) * ( 1 + x + x^3 + x^4 ) (div x^64) ) * x^64 ) (mod Irr(x))
             // xmmCarry1[128:64] = ( ( ( (factor * a[1]) div x^64 ) * ( 1 + x + x^3 + x^4 ) (div x^64) ) * x^64 ) (mod Irr(x))
-            xmmCarry1 = _mm_shuffle_epi8(lookup_reg,xmmCarry1);
+            xmmCarry1 = simde_mm_shuffle_epi8(lookup_reg,xmmCarry1);
            
             // Computing the reduced polynomial:
             //
@@ -274,20 +280,20 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             //
             //  And similarly:
             //  xmmFinal[128:64] = (factor * a[1]) (mod Irr(x))
-            __m128i tmp1 = _mm_xor_si128(xmmCarry00,xmmCarry01);
-            __m128i tmp2 = _mm_xor_si128(xmmCarry1,xmmRes);
-            __m128i xmmFinal = _mm_xor_si128(tmp1,tmp2);
+            simde__m128i tmp1 = simde_mm_xor_si128(xmmCarry00,xmmCarry01);
+            simde__m128i tmp2 = simde_mm_xor_si128(xmmCarry1,xmmRes);
+            simde__m128i xmmFinal = simde_mm_xor_si128(tmp1,tmp2);
 
             // Computing: b[i] = c[i] = b[i] + factor*a[i]
-            __m128i b_vec = _mm_loadu_si128((__m128i*)(&b[currIdx]));
-            b_vec = _mm_xor_si128(b_vec,xmmFinal);
+            simde__m128i b_vec = simde_mm_loadu_si128((simde__m128i*)(&b[currIdx]));
+            b_vec = simde_mm_xor_si128(b_vec,xmmFinal);
             //store b (case 17)
-            _mm_storeu_si128((__m128i*)(&b[currIdx]),b_vec);
+            simde_mm_storeu_si128((simde__m128i*)(&b[currIdx]),b_vec);
 
             // Computing : a[i] = a[i] + c[i] = a[i] + b[i]
             //store a (case 18)
-            a_vec = _mm_xor_si128(a_vec,b_vec);
-            _mm_storeu_si128((__m128i*)(&a[currIdx]),a_vec);
+            a_vec = simde_mm_xor_si128(a_vec,b_vec);
+            simde_mm_storeu_si128((simde__m128i*)(&a[currIdx]),a_vec);
         }
 
         if(hasTail){
@@ -298,7 +304,7 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
 
 void Element::c_mul(const Element* a, const Element* b, Element* c){
 		//register __m128i l = _mm_loadu_si128((__m128i*)irr_poly_e[ord>>5]);
-		register __m128i t;
+		register simde__m128i t;
         {
         //copy a and b to a location where
         //they can be copied from without accesing
@@ -307,9 +313,9 @@ void Element::c_mul(const Element* a, const Element* b, Element* c){
         arr[0] = *a;
         arr[1] = *b;
 
-		t=_mm_clmulepi64_si128(
-				_mm_loadu_si128((__m128i*)&(arr[0])),
-				_mm_loadu_si128((__m128i*)&(arr[1])),
+		*(__uint128_t*)&t=_My_clmul(
+				*(__int128*)&(arr[0]),
+				*(__int128*)&(arr[1]),
 				0
 		);
         }
@@ -326,7 +332,7 @@ void Element::c_mul(const Element* a, const Element* b, Element* c){
          */
         {
         cell_t res0[2] __attribute__ ((aligned (16)));;
-        _mm_store_si128((__m128i*)res0,t);
+        simde_mm_store_si128((simde__m128i*)res0,t);
         const cell_t& lowDeg = res0[0];
         const cell_t& carry0 = res0[1];
         const cell_t carry1 = (carry0>>60);
@@ -341,7 +347,7 @@ void Element::c_mul(const Element* a, const Element* b, Element* c){
 
 void Element::c_mul(const Element& a,const Element& b, Element& c){
 		//__m128i l = _mm_loadu_si128((__m128i*)irr_poly_e[ord>>5]);
-		__m128i t;
+		simde__m128i t;
         
         {
         //copy a and b to a location where
@@ -351,9 +357,9 @@ void Element::c_mul(const Element& a,const Element& b, Element& c){
         arr[0] = a;
         arr[1] = b;
 
-		t=_mm_clmulepi64_si128(
-				_mm_loadu_si128((__m128i*)&(arr[0])),
-				_mm_loadu_si128((__m128i*)&(arr[1])),
+		*(__uint128_t*)&t=_My_clmul(
+				*(__int128*)&(arr[0]),
+				*(__int128*)&(arr[1]),
 				0
 		);
         }
@@ -370,7 +376,7 @@ void Element::c_mul(const Element& a,const Element& b, Element& c){
          */
         {
         cell_t res0[2] __attribute__ ((aligned (16)));;
-        _mm_store_si128((__m128i*)res0,t);
+        simde_mm_store_si128((simde__m128i*)res0,t);
         const cell_t& lowDeg = res0[0];
         const cell_t& carry0 = res0[1];
         const cell_t carry1 = (carry0>>60);

@@ -3,7 +3,7 @@ project(fft)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(LIBS simde myfunctions)
+set(LIBS simde)
 
 add_library(${PROJECT_NAME}
         src/Basis.cpp
