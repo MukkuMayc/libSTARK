@@ -123,13 +123,14 @@ void Element::generateOrdElement(Element* e){
 
 inline void Element::clmulXor(const cell_t* a,const  cell_t* b, cell_t* res)
 {
-	__uint128_t temp = _My_clmul(*(__int128*)a, *(__int128*)b, 0);
+	uint64_t* temp = _My_clmul(*(__int128*)a, *(__int128*)b, 0);
 	simde_mm_storeu_si128((simde__m128i*)res,
 			simde_mm_xor_si128(
 					*((simde__m128i*)a),
 					*(simde__m128i*)temp
 			)
 	);
+	delete[] temp;
 //	register __m128i v1,v2;
 //	ui64_m128i(v1,(const unsigned long*)a);
 //	ui64_m128i(v2,(const unsigned long*)b);
@@ -219,8 +220,15 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             // t1[128:64] = (factor * a[1]) div x^64
 
             simde__m128i t0, t1;
-            *(__uint128_t*)&t0 = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 0);
-            *(__uint128_t*)&t1 = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 1);
+            // *(__uint128_t*)&t0 = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 0);
+            // *(__uint128_t*)&t1 = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 1);
+            uint64_t* temp = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 0);
+            t0 = *(simde__m128i*)temp;
+            delete[] temp;
+
+            temp = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 1);
+            t1s = *(simde__m128i*)temp;
+            delete[] temp;
 
             // Split the products to modular reminders and offsets:
             // xmmRes   [ 64: 0] = (factor * a[0]) mod x^64
@@ -313,11 +321,9 @@ void Element::c_mul(const Element* a, const Element* b, Element* c){
         arr[0] = *a;
         arr[1] = *b;
 
-		*(__uint128_t*)&t=_My_clmul(
-				*(__int128*)&(arr[0]),
-				*(__int128*)&(arr[1]),
-				0
-		);
+        uint64_t* temp = _My_clmul((uint64_t*)&(arr[0]), (uint64_t*)&(arr[1]), 0);
+		t = *(simde__m128i*)temp;
+		delete[] temp;
         }
         
         /*
@@ -357,11 +363,9 @@ void Element::c_mul(const Element& a,const Element& b, Element& c){
         arr[0] = a;
         arr[1] = b;
 
-		*(__uint128_t*)&t=_My_clmul(
-				*(__int128*)&(arr[0]),
-				*(__int128*)&(arr[1]),
-				0
-		);
+        uint64_t* temp = _My_clmul((uint64_t*)&(arr[0]), (uint64_t*)&(arr[1]), 0);
+		t = (simde__m128i*)temp;
+		delete[] temp;
         }
         
         /*
