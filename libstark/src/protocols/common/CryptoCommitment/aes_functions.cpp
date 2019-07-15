@@ -2,6 +2,10 @@
 #define __MY_AES_FUNCTIONS__
 
 #include <cstring>
+#include "ssse3.h"
+// typedef unsigned char uint8_t;
+// typedef unsigned int uint;
+// typedef unsigned long long uint64_t;
 
 const unsigned char Sbox[] = {
         0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76, 
@@ -87,19 +91,6 @@ inline void MixColumns(uint8_t* a) {
 	}
 }
 
-inline void _My_aesenc_si128(uint8_t* a, const uint8_t* RoundKey) {
-    ShiftRows(a);
-	SubBytes(a);
-	MixColumns(a);
-    *(__uint128_t*)a = *(__uint128_t*)a xor *(__uint128_t*)RoundKey;
-}
-
-inline void _My_aesenclast_si128(uint8_t* a, const uint8_t* RoundKey) {
-    ShiftRows(a);
-	SubBytes(a);
-    *(__uint128_t*)a = *(__uint128_t*)a xor *(__uint128_t*)RoundKey;
-}
-
 inline uint SubWord(uint a) {
 	uint8_t* byte = (uint8_t*)&a;
 	for (int i = 0; i < 4; ++i) {
@@ -118,15 +109,29 @@ inline uint RotWord(uint a) {
 	return a;
 }
 
-inline __uint128_t _My_aeskeygenassist_si128(__uint128_t a, const int imm8) {
-	uint* X = (uint*)&a;
+inline void _My_aesenc_si128(uint8_t* a, const uint8_t* RoundKey) {
+    ShiftRows(a);
+	SubBytes(a);
+	MixColumns(a);
+    ((uint64_t*)a)[0] ^= ((uint64_t*)RoundKey)[0];
+    ((uint64_t*)a)[1] ^= ((uint64_t*)RoundKey)[1];
+}
+
+inline void _My_aesenclast_si128(uint8_t* a, const uint8_t* RoundKey) {
+    ShiftRows(a);
+	SubBytes(a);
+    ((uint64_t*)a)[0] ^= ((uint64_t*)RoundKey)[0];
+    ((uint64_t*)a)[1] ^= ((uint64_t*)RoundKey)[1];
+}
+
+inline void _My_aeskeygenassist_si128(uint8_t* a, const int imm8, uint8_t* dst) {
+	uint* X = (uint*)a;
 	uint RCON = imm8;
-	uint dst[4];
-	dst[0] = SubWord(X[1]);
-	dst[1] = RotWord(SubWord(X[1])) xor RCON;
-	dst[2] = SubWord(X[3]);
-	dst[3] = RotWord(SubWord(X[3])) xor RCON;
-	return *(__uint128_t*)dst;
+	uint* dst_uint = (uint*)dst;
+	dst_uint[0] = SubWord(X[1]);
+	dst_uint[1] = RotWord(SubWord(X[1])) xor RCON;
+	dst_uint[2] = SubWord(X[3]);
+	dst_uint[3] = RotWord(SubWord(X[3])) xor RCON;
 }
 
 #endif

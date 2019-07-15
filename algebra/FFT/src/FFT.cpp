@@ -7,6 +7,7 @@
 #include "FFT.h"
 #include "GPU_FFT.cuh"
 #include <cstdlib>
+#include <omp.h>
 #include <cstring>
 #include <iostream>
 namespace FFF {
@@ -72,7 +73,7 @@ FFT::FFT(Basis& b, const fft_operation_t operation) :
 		,gpu_subspace((Chunk**)malloc(sizeof(Chunk*)*(b.getSize()-1)))
 #endif	// #ifdef __GPU
 {
-	// omp_set_num_threads(omp_max_threads);
+	omp_set_num_threads(omp_max_threads);
 	Element* D = (Element*)malloc(sizeof(Element)*b.getSize());
 	Element* G = (Element*)malloc(sizeof(Element)*b.getSize());
 #ifdef __GPU
@@ -260,22 +261,22 @@ void FFT::AlgIFFT(Element* P){
         }
 	}
 	void FFT::multiExponentiate_cpu(Element& e, len_t t,Element* res){
-		// if((t)< omp_max_threads)
-		// 	omp_set_num_threads(t);
+		if((t)< omp_max_threads)
+			omp_set_num_threads(t);
 
 #pragma omp parallel
 		{
-		idx_t idx = 1; //(unsigned int)omp_get_thread_num();
-		idx_t low = (t*idx) / 1; //omp_get_num_threads();
-		idx_t high = (t*(idx+1)) / 1; //omp_get_num_threads();
+		idx_t idx = (unsigned int)omp_get_thread_num();
+		idx_t low = (t*idx)/omp_get_num_threads();
+		idx_t high = (t*(idx+1))/omp_get_num_threads();
 		high = high < t ? high : t;
 		Element::c_exp(e,low,res[low]);
 		for(idx_t i = low ; i < high-1 ; ++i){
 			Element::c_mul(res[i],e,res[i+1]);
 		}
 	}
-		// if((t)< omp_max_threads)
-		// 	omp_set_num_threads(omp_max_threads);
+		if((t)< omp_max_threads)
+			omp_set_num_threads(omp_max_threads);
 	}
 	void FFT::iGPartition_cpu(Element* G, len_t log_g_len,Element* res){
 		len_t g_len = 1<<log_g_len;
@@ -328,7 +329,7 @@ void FFT::AlgIFFT(Element* P){
 		{
 #pragma omp parallel for private(G,tid)
 			for(idx_t j = 0; j<(1UL<<size) ; j+=(1UL<<log_g_len)){
-				tid = 1; // omp_get_thread_num();
+				tid = omp_get_thread_num();
 				G=&P[j];
 				for(size_t i = 0 ; i < half_g_len ; ++i)
 				{
@@ -342,21 +343,21 @@ void FFT::AlgIFFT(Element* P){
 			for(idx_t j = 0; j<(1UL<<size) ; j+=(1UL<<log_g_len))
 			{
 				G=&P[j];
-				// if(half_g_len < omp_max_threads)
-				// 	omp_set_num_threads(half_g_len);
+				if(half_g_len < omp_max_threads)
+					omp_set_num_threads(half_g_len);
 #pragma omp parallel private(tid,low,high)
 				{
-					tid = 1; // omp_get_thread_num();
-					low = (half_g_len*tid) / 1; // omp_get_num_threads();
-					high = (half_g_len*(tid+1)) / 1; //omp_get_num_threads();
+					tid = omp_get_thread_num();
+					low = (half_g_len*tid) /omp_get_num_threads();
+					high = (half_g_len*(tid+1))/omp_get_num_threads();
 					for(size_t i = low ; i < high ; ++i)
 					{
 						Element::c_add(P[j+i],P[j+i+half_g_len],P[j+i+half_g_len]);
 						Element::c_mulXor(P[j+i+half_g_len],subspaces[size-log_g_len][i],P[j+i]);
 					}
 				}
-				// if(half_g_len < omp_max_threads)
-				// 	omp_set_num_threads(omp_max_threads);
+				if(half_g_len < omp_max_threads)
+					omp_set_num_threads(omp_max_threads);
 			}
 		}
 	}
@@ -381,7 +382,7 @@ void FFT::AlgIFFT(Element* P){
 		{
 #pragma omp parallel for private(G,tid) schedule(static,1)
 			for(idx_t j = 0; j<(1UL<<size) ; j+=(1UL<<log_g_len)){
-				tid = 1; // omp_get_thread_num();
+				tid = omp_get_thread_num();
 				G=&P[j];
 				for(size_t i = 0 ; i < half_g_len ; ++i)
 				{
@@ -395,21 +396,21 @@ void FFT::AlgIFFT(Element* P){
 			for(idx_t j = 0; j<(1UL<<size) ; j+=(1UL<<log_g_len))
 			{
 				G=&P[j];
-				// if(half_g_len < omp_max_threads)
-				// 	omp_set_num_threads(half_g_len);
+				if(half_g_len < omp_max_threads)
+					omp_set_num_threads(half_g_len);
 #pragma omp parallel private(tid,low,high)
 				{
-					tid = 1; // omp_get_thread_num();
-					low = (half_g_len*tid); // /omp_get_num_threads();
-					high = (half_g_len*(tid+1)); // /omp_get_num_threads();
+					tid = omp_get_thread_num();
+					low = (half_g_len*tid) /omp_get_num_threads();
+					high = (half_g_len*(tid+1))/omp_get_num_threads();
 					for(unsigned int i = low ; i < high ; ++i)
 					{
 						Element::c_mulXor(P[j+i+half_g_len],subspaces[size-log_g_len][i],P[j+i]);
 						Element::c_add(P[j+i],P[j+i+half_g_len],P[j+i+half_g_len]);
 					}
 				}
-				// if(half_g_len < omp_max_threads)
-				// 	omp_set_num_threads(omp_max_threads);
+				if(half_g_len < omp_max_threads)
+					omp_set_num_threads(omp_max_threads);
 			}
 		}
 	}
@@ -452,8 +453,8 @@ void FFT::AlgIFFT(Element* P){
 		Element* c_p_cpy_local((Element*)malloc(sizeof(Element)*(1UL<<size)));
 		Element* p_cpy = NULL;
 		Element* it;
-		const unsigned int min_log_general_level = MIN(0,size-1); //MIN(log_omp_max_threads,size-1);
-		// omp_set_num_threads(omp_max_threads);
+		const unsigned int min_log_general_level = MIN(log_omp_max_threads,size-1);
+		omp_set_num_threads(omp_max_threads);
 		for(idx_t i = size ; i>= size - min_log_general_level+1 ; --i){
 			UVFromW_cpu(P,i,size);
 		}
@@ -495,17 +496,17 @@ void FFT::AlgIFFT(Element* P){
 		}
 		if(p_cpy==P)
 		{
-			// if(omp_max_threads > (1UL<<size))
-			// 	omp_set_num_threads(1UL<<size);
+			if(omp_max_threads > (1UL<<size))
+				omp_set_num_threads(1UL<<size);
 #pragma omp parallel
 			{
-				unsigned int tid = 1; // omp_get_thread_num();
-				unsigned int low = (tid*(1UL<<size)); // /omp_get_num_threads();
-				unsigned int high = ((tid+1)*(1UL<<size)); // /omp_get_num_threads();
+				unsigned int tid = omp_get_thread_num();
+				unsigned int low = (tid*(1UL<<size))/omp_get_num_threads();
+				unsigned int high = ((tid+1)*(1UL<<size))/omp_get_num_threads();
                 memcpy(&(P[low]),&(c_p_cpy_local[low]),sizeof(Element)*(high-low));
 			}
-			// if(omp_max_threads > (1UL<<size))
-			// 	omp_set_num_threads(omp_max_threads);
+			if(omp_max_threads > (1UL<<size))
+				omp_set_num_threads(omp_max_threads);
 		}
         
         free(c_p_cpy_local);
@@ -550,7 +551,7 @@ void FFT::AlgIFFT(Element* P){
 		Element* p_cpy = P;
 		Element* it = c_p_cpy_local;
 		const unsigned int min_log_general_levels = MIN(log_omp_max_threads,size-1);
-		// omp_set_num_threads(omp_max_threads);
+		omp_set_num_threads(omp_max_threads);
         for(idx_t i =size; i>size-min_log_general_levels ; --i){
 			if((size-i)&1){
 				it=c_p_cpy_local;
@@ -581,17 +582,17 @@ void FFT::AlgIFFT(Element* P){
 		}
 		if(p_cpy!=P)
 		{
-			// if(1UL<<size < omp_max_threads)
-			// 	omp_set_num_threads(1UL<<size);
+			if(1UL<<size < omp_max_threads)
+				omp_set_num_threads(1UL<<size);
 #pragma omp parallel
 			{
-				unsigned int tid = 1; //omp_get_thread_num();
-				long long low = (tid*(1UL << size)); // / omp_get_num_threads();
-				long long high = ((tid + 1)*(1UL << size)); // / omp_get_num_threads();
+				unsigned int tid = omp_get_thread_num();
+				long long low = (tid*(1UL << size)) / omp_get_num_threads();
+				long long high = ((tid + 1)*(1UL << size)) / omp_get_num_threads();
 			memcpy(&(P[low]),&(p_cpy[low]),sizeof(Element)*(high-low));
 			}
-			// if(1UL<<size < omp_max_threads)
-			// 	omp_set_num_threads(omp_max_threads);
+			if(1UL<<size < omp_max_threads)
+				omp_set_num_threads(omp_max_threads);
 		}
         free(c_p_cpy_local);
 		if(min_log_general_levels > size-1){

@@ -8,13 +8,13 @@
  * SSE SUPPORT
  */
 
-// #ifdef WIN32
-// #include <wmmintrin.h>
-// //#include <emmintrin.h>
-// #endif	// #ifdef WIN32
-// #ifdef __GNUC__
-// #include <x86intrin.h>
-//#endif	// #ifdef __GNUC__
+#ifdef WIN32
+#include <wmmintrin.h>
+//#include <emmintrin.h>
+#endif	// #ifdef WIN32
+#ifdef __GNUC__
+#include <x86intrin.h>
+#endif	// #ifdef __GNUC__
 #include <stdint.h>
 #include <stdint.h>
 #include <bitset>
@@ -26,7 +26,6 @@
 #include <bitset>
 #include <iostream>
 
-#include "sse2.h"
 #include "ssse3.h"
 #include "clmul.cpp"
 
@@ -40,7 +39,7 @@ namespace FFF {
 	 GetChar((a), 2), GetChar((a), 3), \
 	 GetChar((a), 4), GetChar((a), 5), \
     GetChar((a), 6), GetChar((a), 7)
-#define _mm_set1_epi64(x) {AS_8CHARS(x), AS_8CHARS(x)}
+#define simde_mm_set1_epi64(x) {AS_8CHARS(x), AS_8CHARS(x)}
 #endif
 #ifdef WIN32
  simde__m128i mask = {-1,-1,-1,-1,-1,-1,-1,-1};
@@ -123,30 +122,29 @@ void Element::generateOrdElement(Element* e){
 
 inline void Element::clmulXor(const cell_t* a,const  cell_t* b, cell_t* res)
 {
-	uint64_t* temp = _My_clmul(*(__int128*)a, *(__int128*)b, 0);
+	register simde__m128i a1 = simde_mm_loadu_si128((simde__m128i*)a);
+	register simde__m128i b1 = simde_mm_loadu_si128((simde__m128i*)b);
+	register uint64_t* clmul_res;
+	_My_clmulepi64_si128((uint64_t*)&a1, (uint64_t*)&b1, 0, clmul_res);
+
 	simde_mm_storeu_si128((simde__m128i*)res,
 			simde_mm_xor_si128(
 					*((simde__m128i*)a),
-					*(simde__m128i*)temp
-			)
+					*((simde__m128i*)clmul_res))
 	);
-	delete[] temp;
-//	register __m128i v1,v2;
-//	ui64_m128i(v1,(const unsigned long*)a);
-//	ui64_m128i(v2,(const unsigned long*)b);
-//	m128i_ui64((unsigned long*)res,_mm_clmulepi64_si128(v1,v2,0));
+	delete[] clmul_res;
 }
 
-//CODE COMMENTED BY ME
 // inline void Element::clmul(const cell_t* a,const  cell_t* b, cell_t* res)
 // {
-// 			*(simde__m128i*)&_My_clmul(
-// 					*(__int128*)a,
-// 					*(__int128*)b,
-// 					0
-// 			);
+// 	register simde__m128i a1 = simde_mm_loadu_si128((simde__m128i*)a);
+// 	register simde__m128i b1 = simde_mm_loadu_si128((simde__m128i*)b);
+// 	_mm_clmulepi64_si128(
+// 		*(__m128i*)&a1,
+// 		*(__m128i*)&b1,
+// 		0
+// 	);
 // }
-
 /*
  * CPU Operations
  */
@@ -218,17 +216,9 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             // t0[128:64] = (factor * a[0]) div x^64
             // t1[ 64: 0] = (factor * a[1]) mod x^64
             // t1[128:64] = (factor * a[1]) div x^64
-
             simde__m128i t0, t1;
-            // *(__uint128_t*)&t0 = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 0);
-            // *(__uint128_t*)&t1 = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 1);
-            uint64_t* temp = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 0);
-            t0 = *(simde__m128i*)temp;
-            delete[] temp;
-
-            temp = _My_clmul(*(__int128*)&a_vec, *(__int128*)&factor_reg, 1);
-            t1s = *(simde__m128i*)temp;
-            delete[] temp;
+            _My_clmulepi64_si128((uint64_t*)&a_vec, (uint64_t*)&factor_reg, 0, (uint64_t*)&t0);
+			_My_clmulepi64_si128((uint64_t*)&a_vec, (uint64_t*)&factor_reg, 1, (uint64_t*)&t1);
 
             // Split the products to modular reminders and offsets:
             // xmmRes   [ 64: 0] = (factor * a[0]) mod x^64
@@ -311,7 +301,7 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
 	}
 
 void Element::c_mul(const Element* a, const Element* b, Element* c){
-		//register __m128i l = _mm_loadu_si128((__m128i*)irr_poly_e[ord>>5]);
+		//register simde__m128i l = simde_mm_loadu_si128((simde__m128i*)irr_poly_e[ord>>5]);
 		register simde__m128i t;
         {
         //copy a and b to a location where
@@ -321,16 +311,17 @@ void Element::c_mul(const Element* a, const Element* b, Element* c){
         arr[0] = *a;
         arr[1] = *b;
 
-        uint64_t* temp = _My_clmul((uint64_t*)&(arr[0]), (uint64_t*)&(arr[1]), 0);
-		t = *(simde__m128i*)temp;
-		delete[] temp;
+    	register simde__m128i a1 = simde_mm_loadu_si128((simde__m128i*)&(arr[0]));
+		register simde__m128i b1 = simde_mm_loadu_si128((simde__m128i*)&(arr[1]));
+
+		_My_clmulepi64_si128((uint64_t*)&a1, (uint64_t*)&b1, 0, (uint64_t*)&t);
         }
         
         /*
          *Matans original generic code
          */
-		//t=_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),_mm_and_si128(t,mask));
-        //t=_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),t);
+		//t=simde_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),simde_mm_and_si128(t,mask));
+        //t=simde_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),t);
 		//memcpy(c,&t,sizeof(cell_t)*element_len);
         
         /*
@@ -352,7 +343,7 @@ void Element::c_mul(const Element* a, const Element* b, Element* c){
 
 
 void Element::c_mul(const Element& a,const Element& b, Element& c){
-		//__m128i l = _mm_loadu_si128((__m128i*)irr_poly_e[ord>>5]);
+		//simde__m128i l = simde_mm_loadu_si128((simde__m128i*)irr_poly_e[ord>>5]);
 		simde__m128i t;
         
         {
@@ -363,16 +354,17 @@ void Element::c_mul(const Element& a,const Element& b, Element& c){
         arr[0] = a;
         arr[1] = b;
 
-        uint64_t* temp = _My_clmul((uint64_t*)&(arr[0]), (uint64_t*)&(arr[1]), 0);
-		t = (simde__m128i*)temp;
-		delete[] temp;
+		register simde__m128i a1 = simde_mm_loadu_si128((simde__m128i*)&(arr[0]));
+		register simde__m128i b1 = simde_mm_loadu_si128((simde__m128i*)&(arr[1]));
+
+		_My_clmulepi64_si128((uint64_t*)&a1, (uint64_t*)&b1, 0, (uint64_t*)&t);
         }
         
         /*
          *Matans original generic code
          */
-        //t=_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),_mm_and_si128(t,mask));
-        //t=_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),t);
+        //t=simde_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),simde_mm_and_si128(t,mask));
+        //t=simde_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),t);
         //memcpy(&c,&t,sizeof(cell_t)*element_len);
 		
         /*
