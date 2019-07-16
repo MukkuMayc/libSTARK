@@ -26,7 +26,7 @@
 #include <bitset>
 #include <iostream>
 
-#include "ssse3.h"
+#include "simde/x86/ssse3.h"
 #include "clmul.cpp"
 
 FFF::Element c_mulXorAux;

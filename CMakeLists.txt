@@ -1,20 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(libSTARK-my)
+project(libSTARK)
 
 file(READ myflags.txt CMAKE_CXX_FLAGS)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fopenmp")
 set(CMAKE_VERBOSE_MAKEFILE on)
-# SET(CMAKE_CXX_COMPILER /usr/bin/g++)
-
-# set(CMAKE_CXX_COMPILER /usr/bin/clang++)
-# set(CMAKE_C_COMPILER /usr/bin/clang)
-
-#FROM MAKEFILE
 
 set(BUILD_DIR bin)
-#EXE_DIR					:= $(WD)/$(BUILD_DIR)
-#BLDDIR					:= $(WD)/$(BUILD_DIR)
 
 set(FFTLIB_SRC_DIR algebra/FFT/src)
 
@@ -25,7 +16,6 @@ set(TINYRAM_DIR ${PROJECT_SOURCE_DIR}/tinyram/stark-tinyram)
 set(DPM_DIR ${PROJECT_SOURCE_DIR}/starkdpm)
 set(FFTLIB_DIR ${PROJECT_SOURCE_DIR}/algebra/FFT)
 set(SIMDE_DIR ${PROJECT_SOURCE_DIR}/simde)
-set(MYFUNCTIONS_DIR ${PROJECT_SOURCE_DIR}/MyFunctions)
 
 set(ALGEBRALIB_TESTS_DIR ${PROJECT_SOURCE_DIR}/algebra/algebralib-tests)
 set(STARK_TESTS_DIR ${PROJECT_SOURCE_DIR}/libstark-tests)
@@ -44,3 +34,7 @@ add_subdirectory(${GADGETLIB3_DIR} bin/gadgetlib)
 
 add_subdirectory(${TINYRAM_DIR})
 add_subdirectory(${DPM_DIR})
+
+# add_subdirectory(ALGEBRALIB_TESTS_DIR)
+# add_subdirectory(STARK_TESTS_DIR)
+# add_subdirectory(TINYRAM_TESTS_DIR)

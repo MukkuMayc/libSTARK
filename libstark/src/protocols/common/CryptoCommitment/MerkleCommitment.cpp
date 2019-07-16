@@ -6,7 +6,7 @@
 #include <algebraLib/FieldElement.hpp>
 #include <iomanip>
 
-#include "ssse3.h"
+#include "simde/x86/ssse3.h"
 #include "aes_functions.cpp"
 
 namespace libstark{

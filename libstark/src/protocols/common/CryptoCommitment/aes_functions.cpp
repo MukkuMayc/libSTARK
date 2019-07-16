@@ -2,7 +2,7 @@
 #define __MY_AES_FUNCTIONS__
 
 #include <cstring>
-#include "ssse3.h"
+#include "simde/x86/ssse3.h"
 // typedef unsigned char uint8_t;
 // typedef unsigned int uint;
 // typedef unsigned long long uint64_t;

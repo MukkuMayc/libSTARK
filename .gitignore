@@ -2,4 +2,7 @@
 **/.idea
 **/_build
 *.o
+*.a
 **/bin
+algebra/FFT/src/simde
+libstark/src/protocols/common/CryptoCommitment/simde
