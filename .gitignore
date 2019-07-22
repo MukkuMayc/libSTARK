@@ -8,3 +8,5 @@ algebra/FFT/src/simde
 libstark/src/protocols/common/CryptoCommitment/simde
 stark-dpm
 stark-tinyram
+stark-dpm-output.txt
+stark-tinyram-output.txt
