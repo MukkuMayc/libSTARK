@@ -251,7 +251,7 @@ void UnivariatePolynomialGeneral::multiply(const UnivariatePolynomialGeneral& ot
 
 
     //compute the product evaluation
-#pragma omp parallel for
+// #pragma omp parallel for
     for(unsigned long long i=0; i< eval2.size(); i++){
         eval1[i] *= eval2[i];
     }
@@ -263,7 +263,7 @@ void UnivariatePolynomialGeneral::multiply(const UnivariatePolynomialGeneral& ot
 void UnivariatePolynomialGeneral::multiply(const FieldElement& factor){
 
     //multiply the coefficients pointwise
-#pragma omp parallel for
+// #pragma omp parallel for
     for(unsigned long long i=0; i< polynomial_.size() ; i++){
         polynomial_[i] *= factor;
     }
@@ -289,7 +289,7 @@ void UnivariatePolynomialGeneral::add(const UnivariatePolynomialGeneral& other){
     }
 
     //add the coefficients pointwise
-#pragma omp parallel for
+// #pragma omp parallel for
     for(unsigned long long i=0; i< otherNumCoeffs ; i++){
         polynomial_[i] += other.polynomial_[i];
     }
