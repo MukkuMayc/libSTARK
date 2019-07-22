@@ -35,13 +35,13 @@ namespace{
             const unsigned short len_c = basisSize-currShift_c;
 
             vector<FieldElement> X_exp_precomp(1UL<<(len_c-1));
-#pragma omp parallel for
+// #pragma omp parallel for
             for(unsigned long long c=0; c < X_exp_precomp.size(); c++){
                 const FieldElement c_elem = getSpaceElementByIndex(orderedBasis,zero(),c<<(currShift_c+1));
                 X_exp_precomp[c] = X_exp[i].eval(c_elem);
             }
 
-#pragma omp parallel for
+// #pragma omp parallel for
             for(unsigned long long mc=0; mc < (spaceSize>>1); mc++){
 
                 const size_t m = mc & currMask_m;
@@ -86,7 +86,7 @@ namespace{
         FFF::Basis basis(basis_vec, orderedBasis.size(),shift_fff);
         FFF::FFT fftInstance(basis,FFF::FFT_OP);
 
-#pragma omp parallel for
+// #pragma omp parallel for
         for(unsigned int i=0; i< numPolys; i++){
             
             vector<FieldElement>& currCoeffs = polysCoeffs[i];
@@ -140,11 +140,11 @@ void novelFFT::FFT(const vector<FieldElement>& affineShift, FieldElement* dst, c
 
     //copy coefficient to destination
     {
-        const unsigned int max_threads_machine = omp_get_max_threads();
+        const unsigned int max_threads_machine = 1; //omp_get_max_threads();
         const size_t bufferBytesLen = polys_.size() * sizeof(FieldElement);
         const size_t blockBytesLen = bufferBytesLen / max_threads_machine;
         const size_t blockRemeinder = bufferBytesLen % max_threads_machine;
-#pragma omp parallel for
+// #pragma omp parallel for
         for(long long blockIdx = 0; blockIdx < max_threads_machine; blockIdx++){
             for(unsigned int cosetIdx = 0; cosetIdx < affineShift.size(); cosetIdx++){
                 memcpy((char*)(dst + (cosetIdx*diff_coset)) + (blockIdx*blockBytesLen), ((char*)&polys_[0]) + (blockIdx*blockBytesLen), blockBytesLen);
@@ -172,7 +172,7 @@ void novelFFT::FFT(const vector<FieldElement>& affineShift, FieldElement* dst, c
             const size_t numShifts = affineShift.size();
 
             vector<vector<FieldElement>> X_exp_precomp(affineShift.size(),vector<FieldElement>(numPrecompute));
-#pragma omp parallel for
+// #pragma omp parallel for
             for(unsigned long long expIdx=0; expIdx < (numShifts<<logNumPrecompute); expIdx++){
                 const size_t c = expIdx & numPrecomputeMask;
                 const size_t cosetId = expIdx >> logNumPrecompute;
@@ -180,7 +180,7 @@ void novelFFT::FFT(const vector<FieldElement>& affineShift, FieldElement* dst, c
                 X_exp_precomp[cosetId][c] = X_exp_[i].eval(c_elem);
             }
 
-#pragma omp parallel for
+// #pragma omp parallel for
             for(unsigned long long mc=0; mc < spaceSize/2; mc++){
 
                 const size_t m = mc & currMask_m;
