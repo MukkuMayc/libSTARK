@@ -54,7 +54,7 @@ namespace{
         const unsigned short witnessDegLog = ceil(Log2(degBound));
         const size_t witnessPow2Deg = POW2(witnessDegLog);
 
-#pragma omp parallel for
+// #pragma omp parallel for
         for(ploopinttype wIndex = 0; wIndex < numOfWitnesses; wIndex++){
 
             const Algebra::UnivariatePolynomialInterface& witnessPoly = *(acspWitness.assignmentPolys()[wIndex]);
@@ -95,7 +95,7 @@ namespace{
     }
 
     void initWitness_ZkMask_coeffs(FieldElement* res, const size_t numCoeffs){
-#pragma omp parallel for
+// #pragma omp parallel for
         for(plooplongtype i =0; i< numCoeffs; i++){
             res[i] = Algebra::generateRandom();
         }
@@ -238,7 +238,7 @@ namespace{
                     
                     //evaluate and collect hashes
                     
-                    const unsigned int max_threads_machine = omp_get_max_threads();
+                    const unsigned int max_threads_machine = 1; // omp_get_max_threads();
                     if(numCosetsInParallel < max_threads_machine){
                         
                         //evaluate
@@ -253,7 +253,7 @@ namespace{
 
                     }
                     else{
-#pragma omp parallel for
+// #pragma omp parallel for
                         for(plooplongtype shiftIdx=0; shiftIdx < numCosetsInParallel; shiftIdx++){
                             FieldElement* currCoset = &cosetEval[shiftIdx*cosetSize*width];
 
@@ -458,7 +458,7 @@ namespace{
         const unsigned short logBlockLen = std::min(10,int(cosetBasis.size()));
         const size_t blockLen = POW2(logBlockLen);
         const size_t numBlocks = POW2(cosetBasis.size() - logBlockLen);
-#pragma omp parallel for
+// #pragma omp parallel for
         for (plooplongtype blockIdx =0; blockIdx < numBlocks; blockIdx++){
             for (unsigned long long inBlockIdx = 0; inBlockIdx < blockLen; inBlockIdx++){
 
@@ -513,7 +513,7 @@ namespace{
         const size_t spaceSize = POW2(basisPCPP.basis.size());
 
         vector<FieldElement> evaluation = compositionPolysEvaluation(acspInstance,acspWitness, basisPCPP.basis, basisPCPP.shift, *uniEvals.boundaryPolysMatrix, entireWitnessKept, numZkMasks);
-#pragma omp parallel for
+// #pragma omp parallel for
 		  for (plooplongtype xIdx = 0; xIdx < spaceSize; xIdx++){
             
             //the ZK mask poly
@@ -615,7 +615,7 @@ namespace{
 
             //evaluate the cosets
             
-            const unsigned int max_threads_machine = omp_get_max_threads();
+            const unsigned int max_threads_machine = 1; //omp_get_max_threads();
             //answer to queries of each coset seperatly
             if(currBlockSize < max_threads_machine){
                 fftInstance.FFT(shifts, &cosetsEval[0], cosetSize*width);
@@ -680,7 +680,7 @@ namespace{
                 }
             }
             else{
-#pragma omp parallel for
+// #pragma omp parallel for
                 for(plooplongtype i=0; i<currBlockSize; i++){
                     FieldElement* cosetEval = &cosetsEval[i*cosetSize*width];
                     const size_t shiftIdx = cosetsWithQueries[blockIdx+i];
@@ -737,7 +737,7 @@ namespace{
 
                         paths[q].second.insert(paths[q].second.end(),merkleTopPath.begin(),merkleTopPath.end());
 
-#pragma omp critical
+// #pragma omp critical
                         {
                             resultsTree.addPath(paths[q].first, paths[q].second, blockPairIndex);
                         }

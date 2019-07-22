@@ -45,6 +45,7 @@ add_library(${PROJECT_NAME}
         simde/hw.c
         )
 
+target_include_directories(${PROJECT_NAME} PUBLIC .)
 target_include_directories(${PROJECT_NAME} PUBLIC simde)
 target_include_directories(${PROJECT_NAME} PUBLIC simde/x86)
 

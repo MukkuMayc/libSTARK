@@ -188,7 +188,7 @@ vector<FieldElement> compositionAlg(const AcspInstance& instance, const AcspWitn
                 fftInstance->FFT(witnessOffsets[currOffset],&witnessEval[0],numWitnesses*cosetSize);
             }
 
-#pragma omp parallel for schedule(guided)
+// #pragma omp parallel for schedule(guided)
             for(plooplongtype i=0; i< wDegBound; i++){
 
                 const long currLocation = i + (currOffset<<wDim);

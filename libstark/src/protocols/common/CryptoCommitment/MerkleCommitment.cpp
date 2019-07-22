@@ -177,7 +177,7 @@ hashDigest_t constructMerkleTree(void const* const src, const short src_logLen, 
     while (curr_dst_logLen >= 0){
         hashDigest_t* curr_dst = ((hashDigest_t*)dst) + (1UL<<curr_dst_logLen);
         const size_t curr_dst_len = POW2(curr_dst_logLen);
-#pragma omp parallel for
+// #pragma omp parallel for
         for(plooplongtype i=0; i<curr_dst_len; i++){
             hash(curr_src+(i<<1UL),curr_dst+i);
         }
@@ -204,7 +204,7 @@ hashDigest_t getMerkleCommitmentInplace(void * dataInp, const short src_logLen){
     for (unsigned short currStepLog=1; currStepLog <= logLen; currStepLog++){
         const size_t currStep = POW2(currStepLog);
         const size_t prevStep = POW2(currStepLog-1);
-#pragma omp parallel for
+// #pragma omp parallel for
         for(plooplongtype i=0; i<buffLen; i+=currStep){
             data[i+1] = data[i+prevStep];
             hash(data+i,data+i);
@@ -235,7 +235,7 @@ void constructMerkleSubTree(void const* const src, const short src_logLen, const
         hashDigest_t* curr_dst_row = ((hashDigest_t*)dst) + POW2(curr_dst_row_logLen);
         hashDigest_t* curr_dst_shifted = curr_dst_row + POW2(curr_sigment_logLen)*sigment_index;
         const size_t curr_sigment_len = POW2(curr_sigment_logLen);
-#pragma omp parallel for
+// #pragma omp parallel for
         for(plooplongtype i=0; i<curr_sigment_len; i++){
             hash(curr_src_shifted+(i<<1UL),curr_dst_shifted+i);
         }
@@ -277,7 +277,7 @@ vector<path_t> getPathToBlocksInPlace(void * dataInp, const short src_logLen, co
         const size_t prevStep = POW2(currStepLog-1);
 
         //construct next layer
-#pragma omp parallel for
+// #pragma omp parallel for
         for(plooplongtype i=0; i<buffLen; i+=currStep){
             data[i+1UL] = data[i+prevStep];
             hash(data+i,data+i);

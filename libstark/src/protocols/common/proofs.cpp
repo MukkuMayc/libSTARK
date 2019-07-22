@@ -82,7 +82,7 @@ namespace{
         //Calculate buffers
         //
         if(multyThreading){
-#pragma omp parallel for
+// #pragma omp parallel for
             for(plooplongtype currSigmentIdx = 0; currSigmentIdx < numSigments; currSigmentIdx++){
                 sigmentConstructor(currSigmentIdx,&data[currSigmentIdx*sigmentLength]);
                 commitment.constructSubtree(&data[0], logSigmentLength, currSigmentIdx);
@@ -193,7 +193,7 @@ CryptoCommitment::SparceMerkleTree dataWithCommitment::answerQueries(const rawQu
 
         const auto currPath =  commitment_.getPathToBlock(CryptoCommitment::getBlockIndex(FElemIndex));
 
-#pragma omp critical
+// #pragma omp critical
         { 
             resultsTree.addPath(data, currPath, blockPairIndex);
         }
