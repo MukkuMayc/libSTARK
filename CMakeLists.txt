@@ -18,7 +18,7 @@ set(FFTLIB_DIR ${PROJECT_SOURCE_DIR}/algebra/FFT)
 set(SIMDE_DIR ${PROJECT_SOURCE_DIR}/simde)
 
 set(ALGEBRALIB_TESTS_DIR ${PROJECT_SOURCE_DIR}/algebra/algebralib-tests)
-set(STARK_TESTS_DIR ${PROJECT_SOURCE_DIR}/libstark-tests)
+set(LIBSTARK_TESTS_DIR ${PROJECT_SOURCE_DIR}/libstark-tests)
 set(TINYRAM_TESTS_DIR ${PROJECT_SOURCE_DIR}/tinyram/stark-tinyram-tests)
 
 #END
@@ -35,6 +35,6 @@ add_subdirectory(${GADGETLIB3_DIR} bin/gadgetlib)
 add_subdirectory(${TINYRAM_DIR})
 add_subdirectory(${DPM_DIR})
 
-# add_subdirectory(ALGEBRALIB_TESTS_DIR)
-# add_subdirectory(STARK_TESTS_DIR)
-# add_subdirectory(TINYRAM_TESTS_DIR)
+add_subdirectory(${ALGEBRALIB_TESTS_DIR})
+add_subdirectory(${LIBSTARK_TESTS_DIR})
+add_subdirectory(${TINYRAM_TESTS_DIR})

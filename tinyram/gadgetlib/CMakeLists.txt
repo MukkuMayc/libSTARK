@@ -3,10 +3,6 @@ project(gadgetlib)
 
 set(CMAKE_CXX_STANDARD 11)
 
-# enable_testing()
-# find_package(GTest)
-# include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
-
 include_directories(gadgetlib)
 include_directories(gadgetlib/SHA)
 
@@ -22,19 +18,20 @@ add_library(${PROJECT_NAME}
         # gadgetlib/tests/protoboard_UTEST.cpp
         # gadgetlib/tests/variable_UTEST.cpp
         gadgetlib/common_use.cpp
-        gadgetlib/common_use.hpp
+        # gadgetlib/common_use.hpp
         gadgetlib/constraint.cpp
-        gadgetlib/constraint.hpp
+        # gadgetlib/constraint.hpp
         gadgetlib/gadget.cpp
-        gadgetlib/gadget.hpp
+        # gadgetlib/gadget.hpp
         gadgetlib/gadgetMacros.hpp
         gadgetlib/infrastructure.cpp
-        gadgetlib/infrastructure.hpp
+        # gadgetlib/infrastructure.hpp
         gadgetlib/protoboard.cpp
-        gadgetlib/protoboard.hpp)
+        # gadgetlib/protoboard.hpp
+)
 
 target_include_directories(gadgetlib PUBLIC .)
-target_include_directories(gadgetlib PUBLIC gadgetlib)
-target_include_directories(gadgetlib PUBLIC gadgetlib/SHA)
+# target_include_directories(gadgetlib PUBLIC gadgetlib)
+# target_include_directories(gadgetlib PUBLIC gadgetlib/SHA)
 
 target_link_libraries(gadgetlib ${LIBS})
