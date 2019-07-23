@@ -8,6 +8,7 @@
 
 #include "simde/x86/ssse3.h"
 #include "aes_functions.cpp"
+#define _MM_SHUFFLE(z,y,x,w) (z << 6) | (y <<4) | (x << 2) | w
 
 namespace libstark{
 namespace Protocols{

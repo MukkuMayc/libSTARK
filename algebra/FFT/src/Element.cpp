@@ -8,13 +8,6 @@
  * SSE SUPPORT
  */
 
-#ifdef WIN32
-#include <wmmintrin.h>
-//#include <emmintrin.h>
-#endif	// #ifdef WIN32
-#ifdef __GNUC__
-#include <x86intrin.h>
-#endif	// #ifdef __GNUC__
 #include <stdint.h>
 #include <stdint.h>
 #include <bitset>

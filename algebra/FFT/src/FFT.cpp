@@ -7,7 +7,6 @@
 #include "FFT.h"
 #include "GPU_FFT.cuh"
 #include <cstdlib>
-#include <omp.h>
 #include <cstring>
 #include <iostream>
 namespace FFF {
