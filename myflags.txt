@@ -1,1 +1,1 @@
--g4 -Wall -fmessage-length=0 -pthread
+-O2 --js-opts 0 -g4 -Wall -fmessage-length=0 -pthread -s DISABLE_EXCEPTION_CATCHING=2 -s ASSERTIONS=1 -s WASM=0

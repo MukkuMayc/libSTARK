@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.4)
 project(stark-tinyram)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -29,8 +29,6 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(tinyram-lib PUBLIC src)
 
-
 target_link_libraries(${PROJECT_NAME}  ${LIBS})
-
 
 install(TARGETS ${PROJECT_NAME} DESTINATION .)
