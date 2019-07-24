@@ -6,7 +6,7 @@
 #include <algebraLib/FieldElement.hpp>
 #include <iomanip>
 
-#include "simde/x86/ssse3.h"
+#include "simd-functions.cpp"
 #include "aes_functions.cpp"
 #define _MM_SHUFFLE(z,y,x,w) (z << 6) | (y <<4) | (x << 2) | w
 
@@ -22,64 +22,107 @@ namespace{
 
 // #define AES_128_key_exp(k, rcon) aes_128_key_expansion(k, _My_aeskeygenassist_si128(k, rcon))
 
-static simde__m128i aes_128_key_expansion(simde__m128i key, simde__m128i keygened){
-    keygened = simde_mm_shuffle_epi32(keygened, _MM_SHUFFLE(3,3,3,3));
-    key = simde_mm_xor_si128(key, simde_mm_slli_si128(key, 4));
-    key = simde_mm_xor_si128(key, simde_mm_slli_si128(key, 4));
-    key = simde_mm_xor_si128(key, simde_mm_slli_si128(key, 4));
-    return simde_mm_xor_si128(key, keygened);
+// static __m128i aes_128_key_expansion(__m128i key, __m128i keygened){
+//     keygened = _mm_shuffle_epi32(keygened, _MM_SHUFFLE(3,3,3,3));
+//     key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
+//     key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
+//     key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
+//     return _mm_xor_si128(key, keygened);
+// }
+
+static void aes_128_key_expansion(uint8_t* key, uint8_t* keygened, uint8_t* dst) {
+    uint64_t temp_mem1[2];
+    _My_shuffle_epi32((uint32_t*)keygened, _MM_SHUFFLE(3, 3, 3, 3), (uint32_t*)temp_mem1);
+    memcpy(keygened, temp_mem1, 16);
+
+    _My_slli_si128(key, 4, (uint8_t*)temp_mem1);
+    _My_xor_si128((uint64_t*)key, temp_mem1, (uint64_t*)key);
+
+    _My_slli_si128(key, 4, (uint8_t*)temp_mem1);
+    _My_xor_si128((uint64_t*)key, temp_mem1, (uint64_t*)key);
+
+    _My_slli_si128(key, 4, (uint8_t*)temp_mem1);
+    _My_xor_si128((uint64_t*)key, temp_mem1, (uint64_t*)key);
+
+    _My_xor_si128((uint64_t*)key, (uint64_t*)keygened, (uint64_t*)dst);
 }
 
 //encrypts the data
-inline simde__m128i aes128_enc(const simde__m128i& data, const simde__m128i& enc_key){
-    simde__m128i m = data;
-    
-    simde__m128i k0 = enc_key;
+// inline __m128i aes128_enc(const __m128i& data, const __m128i& enc_key){
+inline void aes128_enc(const uint64_t* data, const uint64_t* enc_key, uint64_t* dst) {
+    // __m128i m = data;
+    uint8_t* m = (uint8_t*)dst;
+    memcpy(m, data, 16);
 
-    m = simde_mm_xor_si128(m, k0);   
+    // __m128i k0 = enc_key;
+    uint8_t k0[16];
+    memcpy(k0, enc_key, 16);
+
+    // m = _mm_xor_si128(m, k0);
+    _My_xor_si128((uint64_t*)m, (uint64_t*)k0, (uint64_t*)m);   
 
     uint8_t keygened[16];   
-    _My_aeskeygenassist_si128((uint8_t*)&k0, 0x01, keygened);
-    simde__m128i k1  = aes_128_key_expansion(k0, *(simde__m128i*)keygened);
-    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k1);
+    _My_aeskeygenassist_si128(k0, 0x01, keygened);
+    // __m128i k1 = aes_128_key_expansion(k0, *(__m128i*)keygened);
+    uint8_t k1[16];
+    aes_128_key_expansion(k0, keygened, k1);
+    _My_aesenc_si128(m, k1);
     
-    _My_aeskeygenassist_si128((uint8_t*)&k1, 0x02, keygened);
-    simde__m128i k2  = aes_128_key_expansion(k1, *(simde__m128i*)keygened);
-    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k2);
+    _My_aeskeygenassist_si128(k1, 0x02, keygened);
+    // __m128i k2  = aes_128_key_expansion(k1, *(__m128i*)keygened);
+    uint8_t k2[16];
+    aes_128_key_expansion(k1, keygened, k2);
+    _My_aesenc_si128(m, k2);
     
-    _My_aeskeygenassist_si128((uint8_t*)&k2, 0x04, keygened);
-    simde__m128i k3  = aes_128_key_expansion(k2, *(simde__m128i*)keygened);
-    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k3);
+    _My_aeskeygenassist_si128(k2, 0x04, keygened);
+    // __m128i k3  = aes_128_key_expansion(k2, *(__m128i*)keygened);
+    uint8_t k3[16];
+    aes_128_key_expansion(k2, keygened, k3);
+    _My_aesenc_si128(m, k3);
     
-    _My_aeskeygenassist_si128((uint8_t*)&k3, 0x08, keygened);
-    simde__m128i k4  = aes_128_key_expansion(k3, *(simde__m128i*)keygened);
-    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k4);
+    _My_aeskeygenassist_si128(k3, 0x08, keygened);
+    // __m128i k4  = aes_128_key_expansion(k3, *(__m128i*)keygened);
+    uint8_t k4[16];
+    aes_128_key_expansion(k3, keygened, k4);
+    _My_aesenc_si128(m, k4);
     
-    _My_aeskeygenassist_si128((uint8_t*)&k4, 0x10, keygened);
-    simde__m128i k5  = aes_128_key_expansion(k4, *(simde__m128i*)keygened);
-    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k5);
+    _My_aeskeygenassist_si128(k4, 0x10, keygened);
+    // __m128i k5  = aes_128_key_expansion(k4, *(__m128i*)keygened);
+    uint8_t k5[16];
+    aes_128_key_expansion(k4, keygened, k5);
+    _My_aesenc_si128(m, k5);
     
-    _My_aeskeygenassist_si128((uint8_t*)&k5, 0x20, keygened);
-    simde__m128i k6  = aes_128_key_expansion(k5, *(simde__m128i*)keygened);
-    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k6);
+    _My_aeskeygenassist_si128(k5, 0x20, keygened);
+    // __m128i k6  = aes_128_key_expansion(k5, *(__m128i*)keygened);
+    uint8_t k6[16];
+    aes_128_key_expansion(k5, keygened, k6);
+    _My_aesenc_si128(m, k6);
     
-    _My_aeskeygenassist_si128((uint8_t*)&k6, 0x40, keygened);
-    simde__m128i k7  = aes_128_key_expansion(k6, *(simde__m128i*)keygened);
-    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k7);
+    _My_aeskeygenassist_si128(k6, 0x40, keygened);
+    // __m128i k7  = aes_128_key_expansion(k6, *(__m128i*)keygened);
+    uint8_t k7[16];
+    aes_128_key_expansion(k6, keygened, k7);
+    _My_aesenc_si128(m, k7);
     
-    _My_aeskeygenassist_si128((uint8_t*)&k7, 0x80, keygened);
-    simde__m128i k8  = aes_128_key_expansion(k7, *(simde__m128i*)keygened);
-    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k8);
+    _My_aeskeygenassist_si128(k7, 0x80, keygened);
+    // __m128i k8  = aes_128_key_expansion(k7, *(__m128i*)keygened);
+    uint8_t k8[16];
+    aes_128_key_expansion(k7, keygened, k8);
+    _My_aesenc_si128(m, k8);
     
-    _My_aeskeygenassist_si128((uint8_t*)&k8, 0x1B, keygened);
-    simde__m128i k9  = aes_128_key_expansion(k8, *(simde__m128i*)keygened);
-    _My_aesenc_si128((uint8_t*)&m, (uint8_t*)&k9);
+    _My_aeskeygenassist_si128(k8, 0x1B, keygened);
+    // __m128i k9  = aes_128_key_expansion(k8, *(__m128i*)keygened);
+    uint8_t k9[16];
+    aes_128_key_expansion(k8, keygened, k9);
+    _My_aesenc_si128(m, k9);
     
-    _My_aeskeygenassist_si128((uint8_t*)&k9, 0x36, keygened);
-    simde__m128i k10  = aes_128_key_expansion(k9, *(simde__m128i*)keygened);
-    _My_aesenclast_si128((uint8_t*)&m, (uint8_t*)&k10);
+    _My_aeskeygenassist_si128(k9, 0x36, keygened);
+    // __m128i k10  = aes_128_key_expansion(k9, *(__m128i*)keygened);
+    uint8_t k10[16];
+    aes_128_key_expansion(k9, keygened, k10);
+    _My_aesenclast_si128(m, k10);
     
-    return m;
+    // return m;
 }
 }
 
@@ -99,11 +142,17 @@ void hash(void const* const src, void * const dst){
     //Code for AES-128 based hash
     //
     
-    const simde__m128i key = simde_mm_loadu_si128((simde__m128i*)src);
-    const simde__m128i plaintext = simde_mm_loadu_si128(((simde__m128i*)src)+1);
-    const simde__m128i encRes = aes128_enc(plaintext, key);
+    // const __m128i key = _mm_loadu_si128((__m128i*)src);
+    // const __m128i plaintext = _mm_loadu_si128(((__m128i*)src)+1);
+    // const __m128i encRes = aes128_enc(plaintext, key);
+    // uint64_t key[2], plaintext[2], encRes[2];
+    // memcpy(key, src, 16);
+    // memcpy(plaintext, src + 16, 16);
+    uint64_t encRes[2];
+    aes128_enc((uint64_t*)src + 2, (uint64_t*)src, encRes);
 
-    simde_mm_storeu_si128((simde__m128i*)dst, simde_mm_xor_si128(encRes,plaintext));
+    // _mm_storeu_si128((__m128i*)dst, _mm_xor_si128(encRes,plaintext));
+    _My_xor_si128(encRes, (uint64_t*)src + 2, (uint64_t*)dst);
 }
 
 hashDigest_t hash(void const* const src){

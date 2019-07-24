@@ -4,11 +4,7 @@
  *  Created on: May 31, 2014
  *      Author: matan
  */
-/*
- * SSE SUPPORT
- */
 
-#include <stdint.h>
 #include <stdint.h>
 #include <bitset>
 #include <stdio.h>
@@ -19,7 +15,7 @@
 #include <bitset>
 #include <iostream>
 
-#include "simde/x86/ssse3.h"
+#include "simd-functions.cpp"
 #include "clmul.cpp"
 
 FFF::Element c_mulXorAux;
@@ -32,32 +28,33 @@ namespace FFF {
 	 GetChar((a), 2), GetChar((a), 3), \
 	 GetChar((a), 4), GetChar((a), 5), \
     GetChar((a), 6), GetChar((a), 7)
-#define simde_mm_set1_epi64(x) {AS_8CHARS(x), AS_8CHARS(x)}
+#define _mm_set1_epi64(x) {AS_8CHARS(x), AS_8CHARS(x)}
 #endif
-#ifdef WIN32
- simde__m128i mask = {-1,-1,-1,-1,-1,-1,-1,-1};
-#endif // #ifdef WIN32
-#ifdef __GNUC__
-       simde__m128i mask = { (long long int)0b1111111111111111111111111111111111111111111111111111111111111111, 0 };
-#endif // #ifdef __GNUC__
-const idx_t Element::irr_poly_index[][max_nonzero_coefs_in_mod]={
-			{0,(long long unsigned int)-1,(long long unsigned int)-1},
-			{0,2,3,7,32},
-			{0,1,3,4,64}
-		};
+// #ifdef WIN32
+//  __m128i mask = {-1,-1,-1,-1,-1,-1,-1,-1};
+// #endif // #ifdef WIN32
+// #ifdef __GNUC__
+//        __m128i mask = { (long long int)0b1111111111111111111111111111111111111111111111111111111111111111, 0 };
+// #endif // #ifdef __GNUC__
+const idx_t Element::irr_poly_index[][max_nonzero_coefs_in_mod] = {
+	{0,(long long unsigned int)-1,(long long unsigned int)-1},
+	{0,2,3,7,32},
+	{0,1,3,4,64}
+};
 
 const cell_t Element::irr_poly_e[][Element::element_len]={
-		{0},
-		{0},
-		{27}
+	{0},
+	{0},
+	{27}
 };
-const len_t Element::mod_len[]= {3, 5, 5};
+
+const len_t Element::mod_len[] = {3, 5, 5};
 
 //--------------------------------------------------------------//
-	Element::Element(const Element& e){
+	Element::Element(const Element& e) {
 		memcpy(this->c,e.c,sizeof(cell_t)*element_len);
 	}
-	void Element::operator=(const Element& e){
+	void Element::operator=(const Element& e) {
 		memcpy(this->c,e.c,sizeof(cell_t)*element_len);
 	}
 
@@ -76,15 +73,15 @@ void Element::deg(cell_t * a, int & i, len_t len){
 		}
 	i+=offset;
 }
-void setZero(cell_t * a,len_t len){
+void setZero(cell_t * a, len_t len) {
 	for(unsigned int i = 0 ; i < len ; ++i)
-		a[i]=0;
+		a[i] = 0;
 }
-void setUnit(cell_t * a, len_t len){
+void setUnit(cell_t * a, len_t len) {
 	setZero(a,len);
-	a[0]=1;
+	a[0] = 1;
 }
-bool isUnit(cell_t * a, len_t len){
+bool isUnit(cell_t * a, len_t len) {
 	if(a[0]!=1)
 		return false;
 	for(idx_t i = 1; i  < len ; ++i)
@@ -101,37 +98,26 @@ void swap(cell_t * a , cell_t * b,len_t len){
 		a[i]^=b[i];
 	}
 }
-void Element::assign_cells(cell_t* a, cell_t* b,len_t len){
+void Element::assign_cells(cell_t* a, cell_t* b,len_t len) {
 	memcpy(a,b,sizeof(cell_t)*len);
 }
 
-
-
-void Element::generateOrdElement(Element* e){
-	memset(e->c,0,sizeof(cell_t)*element_len);
-	for(unsigned int i = 0 ; i < mod_len[ord>>5]-1;++i)
-		TOGGLE_BIT(e->c,irr_poly_index[ord>>5][i]);
+void Element::generateOrdElement(Element* e) {
+	memset(e->c, 0, sizeof(cell_t) * element_len);
+	for (unsigned int i = 0 ; i < mod_len[ord>>5]-1;++i)
+		TOGGLE_BIT(e->c, irr_poly_index[ord>>5][i]);
 }
 
-inline void Element::clmulXor(const cell_t* a,const  cell_t* b, cell_t* res)
-{
-	register simde__m128i a1 = simde_mm_loadu_si128((simde__m128i*)a);
-	register simde__m128i b1 = simde_mm_loadu_si128((simde__m128i*)b);
-	register uint64_t* clmul_res;
-	_My_clmulepi64_si128((uint64_t*)&a1, (uint64_t*)&b1, 0, clmul_res);
-
-	simde_mm_storeu_si128((simde__m128i*)res,
-			simde_mm_xor_si128(
-					*((simde__m128i*)a),
-					*((simde__m128i*)clmul_res))
-	);
-	delete[] clmul_res;
+inline void Element::clmulXor(const cell_t* a, const cell_t* b, cell_t* res) {
+	uint64_t clmul_res[2];
+	_My_clmulepi64_si128((uint64_t*)a, (uint64_t*)b, 0, clmul_res);
+	_My_xor_si128((uint64_t*)a, clmul_res, (uint64_t*)res);
 }
 
 // inline void Element::clmul(const cell_t* a,const  cell_t* b, cell_t* res)
 // {
-// 	register simde__m128i a1 = simde_mm_loadu_si128((simde__m128i*)a);
-// 	register simde__m128i b1 = simde_mm_loadu_si128((simde__m128i*)b);
+// 	register __m128i a1 = _mm_loadu_si128((__m128i*)a);
+// 	register __m128i b1 = _mm_loadu_si128((__m128i*)b);
 // 	_mm_clmulepi64_si128(
 // 		*(__m128i*)&a1,
 // 		*(__m128i*)&b1,
@@ -141,7 +127,7 @@ inline void Element::clmulXor(const cell_t* a,const  cell_t* b, cell_t* res)
 /*
  * CPU Operations
  */
-	void Element::c_add(const Element* const a,const Element* const b, Element* const c)
+	void Element::c_add(const Element* const a, const Element* const b, Element* const c)
 	{
 		for(unsigned int i = 0 ; i < element_len ; ++i){
 			c->c[i]=(a->c[i]^b->c[i]);
@@ -171,16 +157,23 @@ const char lookupTable1[] = {0x0,0x1b,0x2d,0x36,0x5a,0x41,0x77,0x6c};
 //b[i] = c[i]
 //a[i] = a[i] + c[i]
 //THIS CODE IS IRREDUCIBLE SPECIFIC!!!
-void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const int len){
-		register simde__m128i factor_reg = simde_mm_set1_epi64(*((simde__m64*)(&factor)));
-		register simde__m128i lookup_reg = simde_mm_loadl_epi64((simde__m128i*)lookupTable1);
-        
+void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const int len) {
+		uint64_t temp_mem1[2];
+		uint64_t temp_mem2[2];
 
+		//register __m128i factor_reg = _mm_set1_epi64(*((__m64*)(&factor)));
+		//register __m128i lookup_reg = _mm_loadl_epi64((__m128i*)lookupTable1);
+		uint64_t factor_reg[2];
+		factor_reg[0] = factor_reg[1] = *(uint64_t*)&factor;
+
+		uint64_t lookup_reg[2];
+		lookup_reg[0] = *(uint64_t*)lookupTable1;
+		lookup_reg[1] = 0;
 
         const size_t numIterations = len/2;
         const bool hasTail = len % 2;
         
-        for(size_t i=0; i< numIterations; i++){
+        for(size_t i=0; i< numIterations; i++) {
             const size_t currIdx = i<<1;
             
             /*
@@ -194,8 +187,11 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
              */
 
             // Load a[0] and a[1]
-            simde__m128i a_vec = simde_mm_loadu_si128((simde__m128i*)(&a[currIdx]));
-            
+            // __m128i a_vec = _mm_loadu_si128((__m128i*)(&a[currIdx]));
+            uint64_t a_vec[2];
+            a_vec[0] = *(uint64_t*)&(a[currIdx]);
+            a_vec[1] = *(uint64_t*)&(a[currIdx + 1]);
+
             // Compute factor * a[i] for both i=0,1
             // This multiplication is done as binary polynomials,
             // and results in products of degree at most 126.
@@ -209,9 +205,11 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             // t0[128:64] = (factor * a[0]) div x^64
             // t1[ 64: 0] = (factor * a[1]) mod x^64
             // t1[128:64] = (factor * a[1]) div x^64
-            simde__m128i t0, t1;
-            _My_clmulepi64_si128((uint64_t*)&a_vec, (uint64_t*)&factor_reg, 0, (uint64_t*)&t0);
-			_My_clmulepi64_si128((uint64_t*)&a_vec, (uint64_t*)&factor_reg, 1, (uint64_t*)&t1);
+            // __m128i t0, t1;
+            uint64_t t0[2];
+            uint64_t t1[2];
+            _My_clmulepi64_si128(a_vec, factor_reg, 0, t0);
+			_My_clmulepi64_si128(a_vec, factor_reg, 1, t1);
 
             // Split the products to modular reminders and offsets:
             // xmmRes   [ 64: 0] = (factor * a[0]) mod x^64
@@ -221,26 +219,43 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             //
             // Important note : notice the degree of xmmCarry0[ 64: 0] and xmmCarry0[128:64]
             // is at most (63+63)-64 = 62
-            simde__m128i xmmRes, xmmCarry0, xmmCarry00, xmmCarry01, xmmCarry1;
-            xmmRes = simde_mm_castpd_si128(simde_mm_shuffle_pd(simde_mm_castsi128_pd(t0),simde_mm_castsi128_pd(t1),0));
-            xmmCarry0 = simde_mm_castpd_si128(simde_mm_shuffle_pd(simde_mm_castsi128_pd(t0),simde_mm_castsi128_pd(t1),1|2));
+            // __m128i xmmRes, xmmCarry0, xmmCarry00, xmmCarry01, xmmCarry1;
+            uint64_t xmmRes[2];
+            uint64_t xmmCarry0[2];
+            uint64_t xmmCarry00[2];
+            uint64_t xmmCarry01[2];
+            uint64_t xmmCarry1[2];
+
+            // xmmRes = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(t0),_mm_castsi128_pd(t1),0));
+            // xmmCarry0 = _mm_castpd_si128(_mm_shuffle_pd(_mm_castsi128_pd(t0),_mm_castsi128_pd(t1),1|2));
+            _My_shuffle_pd(t0, t1, 0, xmmRes);
+            _My_shuffle_pd(t0, t1, 1 | 2, xmmCarry0);
 
             // xmmCarry00[ 64: 0] = ( ( (factor * a[0]) div x^64 ) * ( 1 + x ) ) (mod x^64)
             // xmmCarry00[128:64] = ( ( (factor * a[1]) div x^64 ) * ( 1 + x ) ) (mod x^64)
-            xmmCarry00 = simde_mm_xor_si128(xmmCarry0,simde_mm_slli_epi64(xmmCarry0,1));
             
+            // xmmCarry00 = _mm_xor_si128(xmmCarry0,_mm_slli_epi64(xmmCarry0,1));
+            _My_slli_epi64(xmmCarry0, 1, temp_mem1);
+            _My_xor_si128(xmmCarry0, temp_mem1, xmmCarry00);
+
             // xmmCarry01[ 64: 0] = ( ( (factor * a[0]) div x^64 ) * ( x^3 + x^4 ) ) (mod x^64)
             // xmmCarry01[128:64] = ( ( (factor * a[1]) div x^64 ) * ( x^3 + x^4 ) ) (mod x^64)
-            xmmCarry01 = simde_mm_xor_si128(simde_mm_slli_epi64(xmmCarry0,3),simde_mm_slli_epi64(xmmCarry0,4));
             
+            // xmmCarry01 = _mm_xor_si128(_mm_slli_epi64(xmmCarry0,3),_mm_slli_epi64(xmmCarry0,4));
+            _My_slli_epi64(xmmCarry0, 3, temp_mem1);
+            _My_slli_epi64(xmmCarry0, 4, temp_mem2); 
+            _My_xor_si128(temp_mem1, temp_mem2, xmmCarry01);
+
             // xmmCarry1[ 64: 0] = ( ( (factor * a[0]) div x^64 ) * ( 1 + x + x^3 + x^4 ) ) (div x^64)
             // xmmCarry1[128:64] = ( ( (factor * a[1]) div x^64 ) * ( 1 + x + x^3 + x^4 ) ) (div x^64)
             //
             // Important note : notice the degree of xmmCarry1[ 64: 0] and xmmCarry1[128:64]
             // is at most (62+4)-64 = 2.
             // In particular, their support is only in their 3 least significant bits.
-            xmmCarry1 = simde_mm_srli_epi64(xmmCarry0,60);
-           
+            
+            // xmmCarry1 = _mm_srli_epi64(xmmCarry0,60);
+            _My_srli_epi64(xmmCarry0, 60, xmmCarry1);
+
             // We use the fact the degree of either xmmCarr1[ 64: 0] and xmmCarry1[128:64] is at most 2,
             // thus there are only 8 possibilities for each polynomial.
             // Moreover, the product of any such option by 1 + x + x^3 + x^4 is a polynomial
@@ -250,8 +265,11 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             //
             // xmmCarry1[ 64: 0] = ( ( ( (factor * a[0]) div x^64 ) * ( 1 + x + x^3 + x^4 ) (div x^64) ) * x^64 ) (mod Irr(x))
             // xmmCarry1[128:64] = ( ( ( (factor * a[1]) div x^64 ) * ( 1 + x + x^3 + x^4 ) (div x^64) ) * x^64 ) (mod Irr(x))
-            xmmCarry1 = simde_mm_shuffle_epi8(lookup_reg,xmmCarry1);
-           
+            
+            // xmmCarry1 = _mm_shuffle_epi8(lookup_reg,xmmCarry1);
+            _My_shuffle_epi8((uint8_t*)lookup_reg, (uint8_t*)xmmCarry1, (uint8_t*)temp_mem1);
+            memcpy(xmmCarry1, temp_mem1, 16);
+
             // Computing the reduced polynomial:
             //
             // xmmFinal[ 64: 0] = 
@@ -271,20 +289,31 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
             //
             //  And similarly:
             //  xmmFinal[128:64] = (factor * a[1]) (mod Irr(x))
-            simde__m128i tmp1 = simde_mm_xor_si128(xmmCarry00,xmmCarry01);
-            simde__m128i tmp2 = simde_mm_xor_si128(xmmCarry1,xmmRes);
-            simde__m128i xmmFinal = simde_mm_xor_si128(tmp1,tmp2);
+            
+            // __m128i tmp1 = _mm_xor_si128(xmmCarry00, xmmCarry01);
+            // __m128i tmp2 = _mm_xor_si128(xmmCarry1, xmmRes);
+            // __m128i xmmFinal = _mm_xor_si128(tmp1, tmp2);
+            _My_xor_si128(xmmCarry00, xmmCarry01, temp_mem1);
+            _My_xor_si128(xmmCarry1, xmmRes, temp_mem2);
+            uint64_t xmmFinal[2];
+            _My_xor_si128(temp_mem1, temp_mem2, xmmFinal);
 
             // Computing: b[i] = c[i] = b[i] + factor*a[i]
-            simde__m128i b_vec = simde_mm_loadu_si128((simde__m128i*)(&b[currIdx]));
-            b_vec = simde_mm_xor_si128(b_vec,xmmFinal);
+            
+            // __m128i b_vec = _mm_loadu_si128((__m128i*)(&b[currIdx]));
+            // b_vec = _mm_xor_si128(b_vec,xmmFinal);
+            _My_xor_si128((uint64_t*)&(b[currIdx]), xmmFinal, temp_mem1);
+
             //store b (case 17)
-            simde_mm_storeu_si128((simde__m128i*)(&b[currIdx]),b_vec);
+            // _mm_storeu_si128((__m128i*)(&b[currIdx]),b_vec);
+            memcpy((uint64_t*)&(b[currIdx]), temp_mem1, 16);
 
             // Computing : a[i] = a[i] + c[i] = a[i] + b[i]
             //store a (case 18)
-            a_vec = simde_mm_xor_si128(a_vec,b_vec);
-            simde_mm_storeu_si128((simde__m128i*)(&a[currIdx]),a_vec);
+            // a_vec = _mm_xor_si128(a_vec,b_vec);
+            // _mm_storeu_si128((__m128i*)(&a[currIdx]),a_vec);
+            _My_xor_si128(a_vec, temp_mem1, a_vec);
+            memcpy((uint64_t*)&(a[currIdx]), a_vec, 16);
         }
 
         if(hasTail){
@@ -294,27 +323,30 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
 	}
 
 void Element::c_mul(const Element* a, const Element* b, Element* c){
-		//register simde__m128i l = simde_mm_loadu_si128((simde__m128i*)irr_poly_e[ord>>5]);
-		register simde__m128i t;
+		//register __m128i l = _mm_loadu_si128((__m128i*)irr_poly_e[ord>>5]);
+		
+		// register __m128i t;
+		uint64_t t[2];
+
         {
         //copy a and b to a location where
         //they can be copied from without accesing
         //forbidden locations
-        Element arr[3];
-        arr[0] = *a;
-        arr[1] = *b;
+  //       Element arr[3];
+  //       arr[0] = *a;
+  //       arr[1] = *b;
 
-    	register simde__m128i a1 = simde_mm_loadu_si128((simde__m128i*)&(arr[0]));
-		register simde__m128i b1 = simde_mm_loadu_si128((simde__m128i*)&(arr[1]));
+  //   	register __m128i a1 = _mm_loadu_si128((__m128i*)&(arr[0]));
+		// register __m128i b1 = _mm_loadu_si128((__m128i*)&(arr[1]));
 
-		_My_clmulepi64_si128((uint64_t*)&a1, (uint64_t*)&b1, 0, (uint64_t*)&t);
+		_My_clmulepi64_si128((uint64_t*)a, (uint64_t*)b, 0, t);
         }
         
         /*
          *Matans original generic code
          */
-		//t=simde_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),simde_mm_and_si128(t,mask));
-        //t=simde_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),t);
+		//t=_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),_mm_and_si128(t,mask));
+        //t=_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),t);
 		//memcpy(c,&t,sizeof(cell_t)*element_len);
         
         /*
@@ -322,7 +354,10 @@ void Element::c_mul(const Element* a, const Element* b, Element* c){
          */
         {
         cell_t res0[2] __attribute__ ((aligned (16)));;
-        simde_mm_store_si128((simde__m128i*)res0,t);
+        
+        // _mm_store_si128((__m128i*)res0,t);
+        memcpy(res0, t, 16);
+
         const cell_t& lowDeg = res0[0];
         const cell_t& carry0 = res0[1];
         const cell_t carry1 = (carry0>>60);
@@ -336,28 +371,29 @@ void Element::c_mul(const Element* a, const Element* b, Element* c){
 
 
 void Element::c_mul(const Element& a,const Element& b, Element& c){
-		//simde__m128i l = simde_mm_loadu_si128((simde__m128i*)irr_poly_e[ord>>5]);
-		simde__m128i t;
+		//__m128i l = _mm_loadu_si128((__m128i*)irr_poly_e[ord>>5]);
+		// __m128i t;
+		uint64_t t[2];
         
         {
         //copy a and b to a location where
         //they can be copied from without accesing
         //forbidden locations
-        Element arr[3];
-        arr[0] = a;
-        arr[1] = b;
+  //       Element arr[3];
+  //       arr[0] = a;
+  //       arr[1] = b;
 
-		register simde__m128i a1 = simde_mm_loadu_si128((simde__m128i*)&(arr[0]));
-		register simde__m128i b1 = simde_mm_loadu_si128((simde__m128i*)&(arr[1]));
+		// register __m128i a1 = _mm_loadu_si128((__m128i*)&(arr[0]));
+		// register __m128i b1 = _mm_loadu_si128((__m128i*)&(arr[1]));
 
-		_My_clmulepi64_si128((uint64_t*)&a1, (uint64_t*)&b1, 0, (uint64_t*)&t);
+		_My_clmulepi64_si128((uint64_t*)&a, (uint64_t*)&b, 0, t);
         }
         
         /*
          *Matans original generic code
          */
-        //t=simde_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),simde_mm_and_si128(t,mask));
-        //t=simde_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),t);
+        //t=_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),_mm_and_si128(t,mask));
+        //t=_mm_xor_si128(_mm_clmulepi64_si128(t,l,1),t);
         //memcpy(&c,&t,sizeof(cell_t)*element_len);
 		
         /*
@@ -365,7 +401,10 @@ void Element::c_mul(const Element& a,const Element& b, Element& c){
          */
         {
         cell_t res0[2] __attribute__ ((aligned (16)));;
-        simde_mm_store_si128((simde__m128i*)res0,t);
+        
+        // _mm_store_si128((__m128i*)res0,t);
+        memcpy(res0, t, 16);
+
         const cell_t& lowDeg = res0[0];
         const cell_t& carry0 = res0[1];
         const cell_t carry1 = (carry0>>60);

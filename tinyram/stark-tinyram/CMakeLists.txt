@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(BUILD_DIR "bin")
 
-set(LIBS gadgetlib fft algebralib libstark simde)
+set(LIBS gadgetlib fft algebralib libstark)
 
 add_library(tinyram-lib
         src/TinyRAM/TinyRAMDefinitions.cpp

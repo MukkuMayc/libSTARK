@@ -3,7 +3,7 @@ project(libstark)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(LIBS algebralib fft simde)
+set(LIBS algebralib fft)
 
 add_library(${PROJECT_NAME}
         src/common/Algebra/LinearSpace.cpp

@@ -3,8 +3,6 @@ project(fft)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(LIBS simde)
-
 add_library(${PROJECT_NAME}
         src/Basis.cpp
         # src/Basis.h
@@ -18,7 +16,3 @@ add_library(${PROJECT_NAME}
         # src/Polynomials.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
-
-# target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(${PROJECT_NAME}  ${LIBS})

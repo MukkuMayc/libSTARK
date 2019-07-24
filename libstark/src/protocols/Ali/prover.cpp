@@ -6,9 +6,9 @@
 #include "reductions/BairToAcsp/BairToAcsp.hpp"
 
 #include <set>
-#if __GNUG__
-#include <sys/sysinfo.h>
-#endif
+// #if __GNUG__
+// #include <sys/sysinfo.h>
+// #endif
 
 namespace libstark{
 namespace Protocols{
@@ -165,16 +165,16 @@ namespace{
                 unsigned short logVM;
                 //compute RAM amount on current machine
                 {
-#if __GNUG__
-                    struct sysinfo info;
-                    sysinfo(&info);
-                    logRAM = std::floor(Log2(info.totalram));
-                    logVM = std::floor(Log2(info.totalswap + info.totalram));
-                    logVM = std::min(logVM, logRAM); //it seems to be giving best performance
-#else
+// #if __GNUG__
+//                     struct sysinfo info;
+//                     sysinfo(&info);
+//                     logRAM = std::floor(Log2(info.totalram));
+//                     logVM = std::floor(Log2(info.totalswap + info.totalram));
+//                     logVM = std::min(logVM, logRAM); //it seems to be giving best performance
+// #else
                     logRAM = 33;
                     logVM = 33;
-#endif
+// #endif
                 }
                 const unsigned short logCosetSize = widthLog + cosetBasis.size() + Log2(sizeof(FieldElement));
                 entireWitnessKept = (logVM > shiftsBasis.size() + logCosetSize);
@@ -585,13 +585,13 @@ namespace{
             unsigned short logRAM;
             //compute RAM amount on current machine
             {
-#if __GNUG__
-                struct sysinfo info;
-                sysinfo(&info);
-                logRAM = Log2(std::round(info.totalram));
-#else
+// #if __GNUG__
+//                 struct sysinfo info;
+//                 sysinfo(&info);
+//                 logRAM = Log2(std::round(info.totalram));
+// #else
                 logRAM = 33;
-#endif
+// #endif
             }
             logRAM = std::max(logRAM, (unsigned short)(widthLog + cosetBasis.size() + Log2(sizeof(FieldElement)) + 1));
             NumCosetsInParallel = std::min(numCosetsToEvaluate, (size_t)POW2(size_t(logRAM-(widthLog + cosetBasis.size() + Log2(sizeof(FieldElement))))));
