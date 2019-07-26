@@ -19,15 +19,23 @@ add_library(tinyram-lib
         src/TinyRAMtoBair/RamToContraintSystem/transitionFunction.cpp
 )
 
+# set(MY_FLAGS -O3 -Wall -p -pthread -fmessage-length=0 -std=gnu++11)
+file(READ ../../myflags.txt MY_FLAGS)
+separate_arguments(MY_FLAGS NATIVE_COMMAND ${MY_FLAGS})
+target_compile_options(${PROJECT_NAME} PUBLIC ${MY_FLAGS})
+
+
 target_link_libraries(tinyram-lib  ${LIBS})
 
 set(LIBS ${LIBS} tinyram-lib)
+
+target_include_directories(tinyram-lib PUBLIC src)
 
 add_executable(${PROJECT_NAME}
         src/main.cpp
 )
 
-target_include_directories(tinyram-lib PUBLIC src)
+target_compile_options(${PROJECT_NAME} PUBLIC ${MY_FLAGS})
 
 target_link_libraries(${PROJECT_NAME}  ${LIBS})
 

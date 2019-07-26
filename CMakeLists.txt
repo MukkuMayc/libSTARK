@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 project(libSTARK)
 
-file(READ myflags.txt CMAKE_CXX_FLAGS)
-set(CMAKE_VERBOSE_MAKEFILE on)
+# file(READ myflags.txt CMAKE_CXX_FLAGS)
+# set(CMAKE_VERBOSE_MAKEFILE on)
 
 set(BUILD_DIR bin)
 
@@ -33,7 +33,7 @@ add_subdirectory(${LIBSTARK_DIR} bin/libstark)
 add_subdirectory(${GADGETLIB3_DIR} bin/gadgetlib)
 
 add_subdirectory(${TINYRAM_DIR})
-add_subdirectory(${DPM_DIR})
+# add_subdirectory(${DPM_DIR})
 
 # add_subdirectory(${ALGEBRALIB_TESTS_DIR})
 # add_subdirectory(${LIBSTARK_TESTS_DIR})

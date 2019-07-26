@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(stark-dpm)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 set(BUILD_DIR "bin")
 
@@ -27,6 +27,10 @@ add_executable(${PROJECT_NAME}
         AES160hashcLOCI_witness.cpp
         main.cpp
 )
+
+file(READ ../myflags.txt MY_FLAGS)
+separate_arguments(MY_FLAGS NATIVE_COMMAND ${MY_FLAGS})
+target_compile_options(${PROJECT_NAME} PUBLIC ${MY_FLAGS})
 
 target_link_libraries(${PROJECT_NAME}  ${LIBS})
 

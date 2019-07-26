@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.14)
+ cmake_minimum_required(VERSION 3.14)
 project(algebralib)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 set(LIBS fft)
 
@@ -41,6 +41,9 @@ add_library(${PROJECT_NAME}
         headers/algebraLib/variable_operators.hpp
 )
 
+file(READ ../../myflags.txt MY_FLAGS)
+separate_arguments(MY_FLAGS NATIVE_COMMAND ${MY_FLAGS})
+target_compile_options(${PROJECT_NAME} PUBLIC ${MY_FLAGS})
 
 target_include_directories(${PROJECT_NAME} PUBLIC headers)
 target_include_directories(${PROJECT_NAME} PUBLIC headers/algebraLib)
