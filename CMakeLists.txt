@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(CMAKE_CXX_STANDARD 17)
-
 project(libSTARK)
-
-# file(READ myflags.txt CMAKE_CXX_FLAGS)
-# set(CMAKE_VERBOSE_MAKEFILE on)
 
 set(BUILD_DIR bin)
 
@@ -21,8 +16,6 @@ set(FFTLIB_DIR ${PROJECT_SOURCE_DIR}/algebra/FFT)
 set(ALGEBRALIB_TESTS_DIR ${PROJECT_SOURCE_DIR}/algebra/algebralib-tests)
 set(LIBSTARK_TESTS_DIR ${PROJECT_SOURCE_DIR}/libstark-tests)
 set(TINYRAM_TESTS_DIR ${PROJECT_SOURCE_DIR}/tinyram/stark-tinyram-tests)
-
-#END
 
 set(LIBS gadgetlib fft algebralib libstark)
 set(TESTS algebralib-tests libstark-tests stark-tinyram-tests)

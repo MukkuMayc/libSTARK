@@ -1,21 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 project(stark-dpm)
 
-set(CMAKE_CXX_STANDARD 17)
-
 set(BUILD_DIR "bin")
 
-# include_directories(.)
-
-# set(FFTLIB_DIR "${PROJECT_SOURCE_DIR}/../algebra/FFT")
-# set(ALGEBRALIB_DIR "${PROJECT_SOURCE_DIR}/../algebra/algebralib")
-# set(LIBSTARK_DIR "${PROJECT_SOURCE_DIR}/../libstark")
-
 set(LIBS fft algebralib libstark)
-
-# add_subdirectory(${ALGEBRALIB_DIR} bin/algebralib)
-# add_subdirectory(${LIBSTARK_DIR} bin/libstark)
-# add_subdirectory(${FFTLIB_DIR} bin/fftlib)
 
 add_executable(${PROJECT_NAME}
         # AES160hashcLOCI.hpp
@@ -28,9 +16,13 @@ add_executable(${PROJECT_NAME}
         main.cpp
 )
 
-file(READ ../myflags.txt MY_FLAGS)
-separate_arguments(MY_FLAGS NATIVE_COMMAND ${MY_FLAGS})
-target_compile_options(${PROJECT_NAME} PUBLIC ${MY_FLAGS})
+file(READ ../compile_flags.txt COMPILE_FLAGS)
+file(READ ../link_flags.txt    LINK_FLAGS)
+separate_arguments(COMPILE_FLAGS NATIVE_COMMAND ${COMPILE_FLAGS})
+separate_arguments(LINK_FLAGS    NATIVE_COMMAND ${LINK_FLAGS})
+
+target_compile_options(${PROJECT_NAME} PUBLIC ${COMPILE_FLAGS})
+target_link_options(${PROJECT_NAME} PUBLIC ${LINK_FLAGS})
 
 target_link_libraries(${PROJECT_NAME}  ${LIBS})
 
