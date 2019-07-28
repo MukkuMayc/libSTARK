@@ -1,9 +1,9 @@
-include(GoogleTest)
-enable_testing()
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIR})
+# include(GoogleTest)
+# enable_testing()
+# find_package(GTest REQUIRED)
+# include_directories(${GTEST_INCLUDE_DIR})
 
-set(LIBS algebralib ${GTEST_LIBRARIES})
+set(LIBS algebralib gtest)# ${GTEST_LIBRARIES})
 
 add_executable(algebralib-tests
 	main.cpp
@@ -17,6 +17,7 @@ add_executable(algebralib-tests
 	LinearPolynomial_UTEST.cpp
 )
 
-gtest_add_tests(TARGET algebralib-tests)
+# gtest_add_tests(TARGET algebralib-tests)
+add_test(NAME algebralib-tests-test COMMAND algebralib-tests)
 
 target_link_libraries(algebralib-tests ${LIBS})
