@@ -29,7 +29,7 @@
 			  return AES160LOCIhashchain::evalp::ep(x);
 		  }
 
-        bool isEffectiveInput(const size_t varId)const{
+        bool isEffectiveInput(const uint64_t varId)const{
         switch(varId)
         {
 case AES160LOCIhashchain::NUMREGS + AES160LOCIhashchain::reg::W11 : return false;
@@ -222,7 +222,7 @@ case AES160LOCIhashchain::NUMREGS + AES160LOCIhashchain::reg::invRC : return fal
             return std::unique_ptr<PolynomialInterface>(new polyAES160LOCIhashchain_class());
         }
 
-        size_t numVars()const{
+        uint64_t numVars()const{
             return AES160LOCIhashchain::NUMREGS;
         }
 

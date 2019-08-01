@@ -1,15 +1,9 @@
-include(GoogleTest)
-enable_testing()
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIR})
+# include(GoogleTest)
+# enable_testing()
+# find_package(GTest REQUIRED)
+# include_directories(${GTEST_INCLUDE_DIR})
 
-include_directories(.)
-
-include_directories(${TINYRAM_DIR}/src)
-
-include_directories(${BUILD_DIR}/tinyram/stark-tinyram)
-
-set(LIBS gadgetlib tinyram-lib ${GTEST_LIBRARIES})
+set(LIBS gadgetlib tinyram-lib gtest)
 
 add_executable(stark-tinyram-tests
 	main.cpp
@@ -23,6 +17,6 @@ add_executable(stark-tinyram-tests
 	programs_UTEST.cpp
 )
 
-gtest_add_tests(TARGET stark-tinyram-tests)
+add_test(NAME stark-tinyram-tests-test COMMAND stark-tinyram-tests)
 
 target_link_libraries(stark-tinyram-tests ${LIBS})

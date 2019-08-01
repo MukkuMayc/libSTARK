@@ -170,11 +170,11 @@ void Element::do_FFT_step(const Element& factor,Element* a, Element* b, const in
 		lookup_reg[0] = *(uint64_t*)lookupTable1;
 		lookup_reg[1] = 0;
 
-        const size_t numIterations = len/2;
+        const uint64_t numIterations = len/2;
         const bool hasTail = len % 2;
         
-        for(size_t i=0; i< numIterations; i++) {
-            const size_t currIdx = i<<1;
+        for(uint64_t i=0; i< numIterations; i++) {
+            const uint64_t currIdx = i<<1;
             
             /*
              * The following code loads two words of 64 bit each,

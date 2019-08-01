@@ -11,7 +11,7 @@ using namespace AES160LOCIhashchain;
 namespace{
     class idPermutation : public libstark::BairWitness::permutation_t{
         public:
-            size_t getElementByIndex(index_t index)const{
+            uint64_t getElementByIndex(index_t index)const{
                 return index;
             }
     };
@@ -21,7 +21,7 @@ namespace{
 			std::vector<libstark::BairWitness::color_t> coloring_;
         public:
             coloringClass(const AES160LOCIhashcCommonParams& commonParams, const witnessType hashC, const fingerprint_t& fprint):
-				coloring_((size_t(1) << AES160LOCIhashchain::getDim(commonParams.length))-1, vector<FieldElement>(AES160LOCIhashchain::NUMREGS))
+				coloring_((uint64_t(1) << AES160LOCIhashchain::getDim(commonParams.length))-1, vector<FieldElement>(AES160LOCIhashchain::NUMREGS))
             {
 				AES160LOCIhashchain::genWitnessLOCIHashcAES160WithPadding(coloring_, hashC,	commonParams.length, fprint);
 					//std::cout << "done " << coloring_[0][AES160hashchain::reg::STATE] << std::endl;

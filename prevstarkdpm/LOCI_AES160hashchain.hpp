@@ -87,8 +87,8 @@ namespace AES160LOCIhashchain {
 		const FieldElement Rcon_round11 =  xFETransformed *xFETransformed*xFETransformed*xFETransformed*
 			xFETransformed*xFETransformed*xFETransformed*xFETransformed*xFETransformed*xFETransformed;//
 
-		const FieldElement xFE_4 = mapIntegerToFieldElement(0, EXTDIM, size_t(1) << 4);
-		const FieldElement xFE_8 = mapIntegerToFieldElement(0, EXTDIM, size_t(1) << 8);
+		const FieldElement xFE_4 = mapIntegerToFieldElement(0, EXTDIM, uint64_t(1) << 4);
+		const FieldElement xFE_8 = mapIntegerToFieldElement(0, EXTDIM, uint64_t(1) << 8);
 		const FieldElement xFE_minus4 = xFE_4.inverse();
 		const FieldElement xFE_minus8 = xFE_minus4*xFE_minus4;
 		

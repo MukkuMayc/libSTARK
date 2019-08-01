@@ -17,7 +17,6 @@ add_executable(algebralib-tests
 	LinearPolynomial_UTEST.cpp
 )
 
-# gtest_add_tests(TARGET algebralib-tests)
 add_test(NAME algebralib-tests-test COMMAND algebralib-tests)
 
 target_link_libraries(algebralib-tests ${LIBS})

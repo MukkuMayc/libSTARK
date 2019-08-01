@@ -40,15 +40,15 @@ namespace{
 
 typedef pair<BairInstance,BairWitness> BairPair;
 
-vector<pair<size_t,size_t>> constructNeighborsLocations(const vector<vector<unique_ptr<const UnivariatePolynomialInterface>>>& neighborsVec){
+vector<pair<uint64_t,uint64_t>> constructNeighborsLocations(const vector<vector<unique_ptr<const UnivariatePolynomialInterface>>>& neighborsVec){
     
     //construct a mapping from neighbor id to (poly,layer)
-    vector<pair<size_t,size_t>> neighborsInLayers;
-    size_t currLayer = 0;
+    vector<pair<uint64_t,uint64_t>> neighborsInLayers;
+    uint64_t currLayer = 0;
     for(const auto& nVec : neighborsVec){
-        size_t currIdx = 0;
+        uint64_t currIdx = 0;
         for(unsigned int i=0; i<nVec.size(); i++){
-            neighborsInLayers.push_back(pair<size_t,size_t>(currLayer,currIdx));
+            neighborsInLayers.push_back(pair<uint64_t,uint64_t>(currLayer,currIdx));
             currIdx++;
         }
         currLayer++;
@@ -63,24 +63,24 @@ void verifyID(const BairPair& bair_pair, const AcspNeighbors& neighbors){
     const witnessMappings mappings(defs);
 
     //some constants
-    const size_t layersAmount = (defs.variablesPerm().size()+1)*2;
-    const size_t amountOfRows = defs.imageHeight();
-    const size_t columnsAmount = defs.imageWidth()-1;
+    const uint64_t layersAmount = (defs.variablesPerm().size()+1)*2;
+    const uint64_t amountOfRows = defs.imageHeight();
+    const uint64_t columnsAmount = defs.imageWidth()-1;
 
     //get the neighbors polynomials vector
     const auto neighborsVec = neighbors.getNeighborPolynomials();
 
     //construct a mapping from neighbor id to (poly,layer)
-    vector<pair<size_t,size_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
+    vector<pair<uint64_t,uint64_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
 
     //verify neighbors by testing on all network locations
-    for(size_t layerId=0; layerId < layersAmount; layerId++){
+    for(uint64_t layerId=0; layerId < layersAmount; layerId++){
         
         const auto curr_loc = neighborsInLayers[neighbors.locationOfId(layerId)];
         const auto& idPoly = *(neighborsVec[curr_loc.first][curr_loc.second]);
         
-        for(size_t rowId=0; rowId < amountOfRows; rowId++){
-            for (size_t columnId=0; columnId < columnsAmount; columnId++){
+        for(uint64_t rowId=0; rowId < amountOfRows; rowId++){
+            for (uint64_t columnId=0; columnId < columnsAmount; columnId++){
 
                 //get the current location
                 const FieldElement currLocation = mappings.map_spaceIndex_to_fieldElement(mappings.mapNetworkElement_spaceIndex(rowId,columnId,layerId));
@@ -103,24 +103,24 @@ void verifyTwinLayer(const BairPair& bair_pair, const AcspNeighbors& neighbors){
     const witnessMappings mappings(defs);
 
     //some constants
-    const size_t layersAmount = defs.variablesPerm().size()*2;
-    const size_t amountOfRows = defs.imageHeight();
-    const size_t columnsAmount = defs.imageWidth()-1;
+    const uint64_t layersAmount = defs.variablesPerm().size()*2;
+    const uint64_t amountOfRows = defs.imageHeight();
+    const uint64_t columnsAmount = defs.imageWidth()-1;
 
     //get the neighbors polynomials vector
     const auto neighborsVec = neighbors.getNeighborPolynomials();
 
     //construct a mapping from neighbor id to (poly,layer)
-    vector<pair<size_t,size_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
+    vector<pair<uint64_t,uint64_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
 
     //verify neighbors by testing on all network locations
-    for(size_t layerId=0; layerId < layersAmount; layerId++){
+    for(uint64_t layerId=0; layerId < layersAmount; layerId++){
         
         const auto curr_loc = neighborsInLayers[neighbors.locationOfTwinLayer(layerId)];
         const auto& twinPoly = *(neighborsVec[curr_loc.first][curr_loc.second]);
         
-        for(size_t rowId=0; rowId < amountOfRows; rowId++){
-            for (size_t columnId=0; columnId < columnsAmount; columnId++){
+        for(uint64_t rowId=0; rowId < amountOfRows; rowId++){
+            for (uint64_t columnId=0; columnId < columnsAmount; columnId++){
 
                 //get the current location
                 const FieldElement currLocation = mappings.map_spaceIndex_to_fieldElement(mappings.mapNetworkElement_spaceIndex(rowId,columnId,layerId));
@@ -137,10 +137,10 @@ void verifyTwinLayer(const BairPair& bair_pair, const AcspNeighbors& neighbors){
     }
 }
 
-size_t cyclicShift(const size_t src, const char bitsAmount){
+uint64_t cyclicShift(const uint64_t src, const char bitsAmount){
     
     //get mask for cyclic shift
-    const size_t mask = POW2(bitsAmount) - 1;
+    const uint64_t mask = POW2(bitsAmount) - 1;
 
     return ((src<<1)&mask) ^ (((src<<1)&(~mask)) >> bitsAmount);
 }
@@ -151,38 +151,38 @@ void verifyDeBruijn(const BairPair& bair_pair, const AcspNeighbors& neighbors){
     const witnessMappings mappings(defs);
 
     //some constants
-    const size_t bitsForRowId = defs.heightSpaceDimension();
-    const size_t bitsForColumnId = defs.widthSpaceDimension();
-    const size_t layersAmount = defs.variablesPerm().size()*2;
-    const size_t amountOfRows = defs.imageHeight();
-    const size_t columnsAmount = defs.imageWidth()-2;
+    const uint64_t bitsForRowId = defs.heightSpaceDimension();
+    const uint64_t bitsForColumnId = defs.widthSpaceDimension();
+    const uint64_t layersAmount = defs.variablesPerm().size()*2;
+    const uint64_t amountOfRows = defs.imageHeight();
+    const uint64_t columnsAmount = defs.imageWidth()-2;
 
     //get the neighbors polynomials vector
     const auto neighborsVec = neighbors.getNeighborPolynomials();
 
     //construct a mapping from neighbor id to (poly,layer)
-    vector<pair<size_t,size_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
+    vector<pair<uint64_t,uint64_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
 
     //verify neighbors by testing on all network locations except
     //the last column which is not routed using DeBruijn neighbors
-    for(size_t layerId=0; layerId < layersAmount; layerId++){
-        for(size_t rowId=0; rowId < amountOfRows; rowId++){
-            for (size_t columnId=0; columnId < columnsAmount; columnId++){
+    for(uint64_t layerId=0; layerId < layersAmount; layerId++){
+        for(uint64_t rowId=0; rowId < amountOfRows; rowId++){
+            for (uint64_t columnId=0; columnId < columnsAmount; columnId++){
 
                 //get the DeBruijn neighbors for curr location
-                const size_t rowId_N0 = cyclicShift(rowId   , bitsForRowId);
+                const uint64_t rowId_N0 = cyclicShift(rowId   , bitsForRowId);
                 //because this is a reverse DeBruijn, the xor with "1" must be done before the cyclic shift
-                const size_t rowId_N1 = cyclicShift(rowId^1 , bitsForRowId);
+                const uint64_t rowId_N1 = cyclicShift(rowId^1 , bitsForRowId);
 
                 //get the current location
                 const FieldElement currLocation = mappings.map_spaceIndex_to_fieldElement(mappings.mapNetworkElement_spaceIndex(rowId,columnId,layerId));
 
                 //calculate the coset Id, so we can
                 //find the relevant DeBruijn neighbor
-                const size_t rowIdLastBitLocation = bitsForRowId - 1;
-                const size_t columnIdLastBitLocation = bitsForRowId + bitsForColumnId - 1;
-                const size_t rowLastBit = mapFieldElementToInteger(rowIdLastBitLocation,1,currLocation);
-                const size_t columnLastBit = mapFieldElementToInteger(columnIdLastBitLocation,1,currLocation);
+                const uint64_t rowIdLastBitLocation = bitsForRowId - 1;
+                const uint64_t columnIdLastBitLocation = bitsForRowId + bitsForColumnId - 1;
+                const uint64_t rowLastBit = mapFieldElementToInteger(rowIdLastBitLocation,1,currLocation);
+                const uint64_t columnLastBit = mapFieldElementToInteger(columnIdLastBitLocation,1,currLocation);
                 const short cosetId = 2*rowLastBit + columnLastBit;
 
                 //get the neighbor polynomials
@@ -215,26 +215,26 @@ void verifyRoutingBit(const BairPair& bair_pair, const AcspNeighbors& neighbors)
     const witnessMappings mappings(defs);
 
     //some constants
-    const size_t layersAmount = defs.variablesPerm().size()*2;
-    const size_t amountOfRows = defs.imageHeight();
-    const size_t columnsAmount = defs.imageWidth()-1;
-    const size_t firstRoutingBitLayerId = layersAmount;
+    const uint64_t layersAmount = defs.variablesPerm().size()*2;
+    const uint64_t amountOfRows = defs.imageHeight();
+    const uint64_t columnsAmount = defs.imageWidth()-1;
+    const uint64_t firstRoutingBitLayerId = layersAmount;
 
     //get the neighbors polynomials vector
     const auto neighborsVec = neighbors.getNeighborPolynomials();
 
     //construct a mapping from neighbor id to (poly,layer)
-    vector<pair<size_t,size_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
+    vector<pair<uint64_t,uint64_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
 
     //verify neighbors by testing on all network locations
-    for(size_t layerId=0; layerId < layersAmount; layerId++){
+    for(uint64_t layerId=0; layerId < layersAmount; layerId++){
         
         const auto curr_loc = neighborsInLayers[neighbors.locationOfRoutingBit(layerId)];
         const auto& routingBitAccessPoly = *(neighborsVec[curr_loc.first][curr_loc.second]);
-        const size_t relevantRoutingBitsLayerId = firstRoutingBitLayerId + (layerId & 1);
+        const uint64_t relevantRoutingBitsLayerId = firstRoutingBitLayerId + (layerId & 1);
         
-        for(size_t rowId=0; rowId < amountOfRows; rowId++){
-            for (size_t columnId=0; columnId < columnsAmount; columnId++){
+        for(uint64_t rowId=0; rowId < amountOfRows; rowId++){
+            for (uint64_t columnId=0; columnId < columnsAmount; columnId++){
 
                 //get the current location
                 const FieldElement currLocation = mappings.map_spaceIndex_to_fieldElement(mappings.mapNetworkElement_spaceIndex(rowId,columnId,layerId));
@@ -259,21 +259,21 @@ void verifyPermutationConstraints(const BairPair& bair_pair, const AcspNeighbors
     const instanceMappings& mappings_common(defs);
 
     //some constants
-    const size_t rowsNum = defs.imageHeight();
+    const uint64_t rowsNum = defs.imageHeight();
 
     //get the neighbors polynomials vector
     const auto neighborsVec = neighbors.getNeighborPolynomials();
 
     //construct a mapping from neighbor id to (poly,layer)
-    vector<pair<size_t,size_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
+    vector<pair<uint64_t,uint64_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
 
     //verify neighbors by testing on all permutation constraints, and all rows
-    for(size_t currPoly_indx=0; currPoly_indx < defs.getConstraintsPi().size(); currPoly_indx++){
+    for(uint64_t currPoly_indx=0; currPoly_indx < defs.getConstraintsPi().size(); currPoly_indx++){
         const PolynomialInterface* currPoly = defs.getConstraintsPi()[currPoly_indx].get();
-        const size_t testIndex = testLocations.indexOfConstraint_Permuation(currPoly_indx);
+        const uint64_t testIndex = testLocations.indexOfConstraint_Permuation(currPoly_indx);
 
         //neighbors for current row
-        for (size_t varId=0; varId < partialInstance.vectorsLen(); varId++){
+        for (uint64_t varId=0; varId < partialInstance.vectorsLen(); varId++){
             
             //verify the neighbor for current variable exists if and only if
             //it is used by the polynomial
@@ -287,7 +287,7 @@ void verifyPermutationConstraints(const BairPair& bair_pair, const AcspNeighbors
             const auto& currNeighbor = *(neighborsVec[currNeighbor_loc.first][currNeighbor_loc.second]);
 
             //verify the neighbor
-            for(size_t rowId=0; rowId < rowsNum; rowId++){
+            for(uint64_t rowId=0; rowId < rowsNum; rowId++){
                 const FieldElement testLocation = mappings.mapNonPermutationElement(rowId, testIndex);
                 const FieldElement rowIndicator = testLocation - mappings_common.mapNonPermutationElement(testIndex);
                 const FieldElement res = currNeighbor.eval(testLocation);
@@ -310,8 +310,8 @@ void verifyPermutationConstraints(const BairPair& bair_pair, const AcspNeighbors
         }
 
         //neighbors for next row (next using witness permutation)
-        const size_t shift = partialInstance.vectorsLen();
-        for (size_t varId=shift; varId < shift+partialInstance.vectorsLen(); varId++){
+        const uint64_t shift = partialInstance.vectorsLen();
+        for (uint64_t varId=shift; varId < shift+partialInstance.vectorsLen(); varId++){
 
             //verify the neighbor for current variable exists if and only if
             //it is used by the polynomial
@@ -325,7 +325,7 @@ void verifyPermutationConstraints(const BairPair& bair_pair, const AcspNeighbors
             const auto& currNeighbor = *(neighborsVec[currNeighbor_loc.first][currNeighbor_loc.second]);
 
             //verify the neighbor
-            for(size_t rowId=0; rowId < rowsNum; rowId++){
+            for(uint64_t rowId=0; rowId < rowsNum; rowId++){
                 const FieldElement testLocation = mappings.mapNonPermutationElement(rowId, testIndex);
                 const FieldElement rowIndicator = testLocation - mappings_common.mapNonPermutationElement(testIndex);
                 const FieldElement res = currNeighbor.eval(testLocation);
@@ -352,23 +352,23 @@ void verifyAssignmentConstraints(const BairPair& bair_pair, const AcspNeighbors&
     const instanceMappings& mappings_common(defs);
 
     //some constants
-    const size_t rowsNum = defs.imageHeight();
+    const uint64_t rowsNum = defs.imageHeight();
 
     //get the neighbors vec
     const auto neighborsVec = neighbors.getNeighborPolynomials();
 
     //construct a mapping from neighbor id to (poly,layer)
-    vector<pair<size_t,size_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
+    vector<pair<uint64_t,uint64_t>> neighborsInLayers = constructNeighborsLocations(neighborsVec);
 
     //verify neighbors by testing on all permutation constraints, and all rows
-    const size_t rowIdMSB_index = defs.heightSpaceDimension()-1;
+    const uint64_t rowIdMSB_index = defs.heightSpaceDimension()-1;
     
-    for(size_t currPoly_indx=0; currPoly_indx < defs.getConstraintsChi().size(); currPoly_indx++){
+    for(uint64_t currPoly_indx=0; currPoly_indx < defs.getConstraintsChi().size(); currPoly_indx++){
         const PolynomialInterface* currPoly = defs.getConstraintsChi()[currPoly_indx].get();
-        const size_t testIndex = testLocations.indexOfConstraint_Assignment(currPoly_indx);
+        const uint64_t testIndex = testLocations.indexOfConstraint_Assignment(currPoly_indx);
 
         //neighbors for current row
-        for (size_t varId=0; varId < partialInstance.vectorsLen(); varId++){
+        for (uint64_t varId=0; varId < partialInstance.vectorsLen(); varId++){
             
             //verify the neighbor for current variable exists if and only if
             //it is used by the polynomial
@@ -385,7 +385,7 @@ void verifyAssignmentConstraints(const BairPair& bair_pair, const AcspNeighbors&
             const auto& currNeighbor = *(neighborsVec[currNeighbor_loc.first][currNeighbor_loc.second]);
 
             //verify the neighbor
-            for(size_t rowId=0; rowId < rowsNum; rowId++){
+            for(uint64_t rowId=0; rowId < rowsNum; rowId++){
                 const FieldElement testLocation = mappings.mapNonPermutationElement(rowId, testIndex);
                 const FieldElement rowIndicator = testLocation - mappings_common.mapNonPermutationElement(testIndex);
                 const FieldElement res = currNeighbor.eval(testLocation);
@@ -406,8 +406,8 @@ void verifyAssignmentConstraints(const BairPair& bair_pair, const AcspNeighbors&
         }
         
         //neighbors for next row (next using instance permutation)
-        const size_t shift = partialInstance.vectorsLen();
-        for (size_t varId=shift; varId < shift+partialInstance.vectorsLen(); varId++){
+        const uint64_t shift = partialInstance.vectorsLen();
+        for (uint64_t varId=shift; varId < shift+partialInstance.vectorsLen(); varId++){
 
             //verify the neighbor for current variable exists if and only if
             //it is used by the polynomial
@@ -419,12 +419,12 @@ void verifyAssignmentConstraints(const BairPair& bair_pair, const AcspNeighbors&
             //else, get the neighbor
 
             //verify the neighbor
-            for(size_t rowId=0; rowId < rowsNum; rowId++){
+            for(uint64_t rowId=0; rowId < rowsNum; rowId++){
                 const FieldElement testLocation = mappings.mapNonPermutationElement(rowId, testIndex);
                 const FieldElement nextRowIndicator = mappings.mapNonPermutationElement(rowId+1,0) - mappings_common.mapNonPermutationElement(0);
                 
                 // get the MSB of the rowId in order to decide the right neighbor version
-                const size_t neighborVersion = mapFieldElementToInteger(rowIdMSB_index,1,testLocation);
+                const uint64_t neighborVersion = mapFieldElementToInteger(rowIdMSB_index,1,testLocation);
                 const auto currNeighbor_loc = neighborsInLayers[neighbors.locationOfAssignmentCS(currPoly_indx,varId,neighborVersion)];
                 const auto& currNeighbor = *(neighborsVec[currNeighbor_loc.first][currNeighbor_loc.second]);
                 

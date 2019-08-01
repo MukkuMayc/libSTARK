@@ -192,19 +192,19 @@ unsigned short getDualBlockSize(){
     return 2*getBlockSize();
 }
 
-size_t getBlockIndex(const size_t elementIndex){
+uint64_t getBlockIndex(const uint64_t elementIndex){
     return elementIndex/getBlockSize();
 }
 
-size_t getElementIndex(const size_t blockIndex){
+uint64_t getElementIndex(const uint64_t blockIndex){
     return blockIndex * getBlockSize();
 }
 
-unsigned short getOffsetInBlock(const size_t index){
+unsigned short getOffsetInBlock(const uint64_t index){
     return index - getBlockIndex(index)*getBlockSize();
 }
 
-unsigned short getOffsetInDualBlock(const size_t index){
+unsigned short getOffsetInDualBlock(const uint64_t index){
     return index - (getBlockIndex(index) & ~1UL)*getBlockSize();
 }
 
@@ -226,7 +226,7 @@ hashDigest_t constructMerkleTree(void const* const src, const short src_logLen, 
 
     while (curr_dst_logLen >= 0){
         hashDigest_t* curr_dst = ((hashDigest_t*)dst) + (1UL<<curr_dst_logLen);
-        const size_t curr_dst_len = POW2(curr_dst_logLen);
+        const uint64_t curr_dst_len = POW2(curr_dst_logLen);
 // #pragma omp parallel for
         for(plooplongtype i=0; i<curr_dst_len; i++){
             hash(curr_src+(i<<1UL),curr_dst+i);
@@ -247,13 +247,13 @@ hashDigest_t getMerkleCommitmentInplace(void * dataInp, const short src_logLen){
 
 
     const unsigned short logLen = src_logLen - logBytesPerHash;
-    const size_t buffLen = POW2(logLen);
+    const uint64_t buffLen = POW2(logLen);
     hashDigest_t* data = (hashDigest_t*)dataInp;
 
     
     for (unsigned short currStepLog=1; currStepLog <= logLen; currStepLog++){
-        const size_t currStep = POW2(currStepLog);
-        const size_t prevStep = POW2(currStepLog-1);
+        const uint64_t currStep = POW2(currStepLog);
+        const uint64_t prevStep = POW2(currStepLog-1);
 // #pragma omp parallel for
         for(plooplongtype i=0; i<buffLen; i+=currStep){
             data[i+1] = data[i+prevStep];
@@ -271,7 +271,7 @@ hashDigest_t getMerkleCommitmentInplace(void * dataInp, const short src_logLen){
 // It is expected src_logLen is in bytes.
 // It is expected the size of dst in bytes is at least srcLen.
 //
-void constructMerkleSubTree(void const* const src, const short src_logLen, const size_t sigment_logLen, const size_t sigment_index, void * const dst){
+void constructMerkleSubTree(void const* const src, const short src_logLen, const uint64_t sigment_logLen, const uint64_t sigment_index, void * const dst){
 
     using Infrastructure::POW2;
 
@@ -284,7 +284,7 @@ void constructMerkleSubTree(void const* const src, const short src_logLen, const
     while (curr_sigment_logLen >=0){
         hashDigest_t* curr_dst_row = ((hashDigest_t*)dst) + POW2(curr_dst_row_logLen);
         hashDigest_t* curr_dst_shifted = curr_dst_row + POW2(curr_sigment_logLen)*sigment_index;
-        const size_t curr_sigment_len = POW2(curr_sigment_logLen);
+        const uint64_t curr_sigment_len = POW2(curr_sigment_logLen);
 // #pragma omp parallel for
         for(plooplongtype i=0; i<curr_sigment_len; i++){
             hash(curr_src_shifted+(i<<1UL),curr_dst_shifted+i);
@@ -296,11 +296,11 @@ void constructMerkleSubTree(void const* const src, const short src_logLen, const
     }
 }
 
-path_t getPathToBlock(void const*const tree, const short src_logLen, const size_t blockIndex){
+path_t getPathToBlock(void const*const tree, const short src_logLen, const uint64_t blockIndex){
     path_t result;
     hashDigest_t const*const tree_ = (hashDigest_t const*const)tree;
     const short firstRow_logLen = src_logLen - logBytesPerHash - 1;
-    size_t curr_offset = (1UL<<firstRow_logLen) + (blockIndex>>1);
+    uint64_t curr_offset = (1UL<<firstRow_logLen) + (blockIndex>>1);
     
     while(curr_offset > 1UL){
         result.push_back(tree_[curr_offset ^ 1UL]);
@@ -310,21 +310,21 @@ path_t getPathToBlock(void const*const tree, const short src_logLen, const size_
     return result;
 }
 
-vector<path_t> getPathToBlocksInPlace(void * dataInp, const short src_logLen, const vector<size_t>& blockIndices){
+vector<path_t> getPathToBlocksInPlace(void * dataInp, const short src_logLen, const vector<uint64_t>& blockIndices){
     using Infrastructure::POW2;
     _COMMON_ASSERT(src_logLen > logBytesPerHash,"It is assumed the source length contains a power of 2 blocks of 256 bits, src_logLen = " + std::to_string(src_logLen));
 
 
     const unsigned short logLen = src_logLen - logBytesPerHash;
-    const size_t buffLen = POW2(logLen);
+    const uint64_t buffLen = POW2(logLen);
     hashDigest_t* data = (hashDigest_t*)dataInp;
 
     vector<path_t> res(blockIndices.size());
 
     
     for (unsigned short currStepLog=1; currStepLog <= logLen; currStepLog++){
-        const size_t currStep = POW2(currStepLog);
-        const size_t prevStep = POW2(currStepLog-1);
+        const uint64_t currStep = POW2(currStepLog);
+        const uint64_t prevStep = POW2(currStepLog-1);
 
         //construct next layer
 // #pragma omp parallel for
@@ -341,9 +341,9 @@ vector<path_t> getPathToBlocksInPlace(void * dataInp, const short src_logLen, co
             }
             
             for(unsigned int q=0; q<blockIndices.size(); q++){
-                const size_t currLayerBlock = blockIndices[q]>>(currStepLog-1);
-                const size_t currTwin = currLayerBlock ^ 1UL;
-                const size_t TwinLocation = currTwin*currStep;
+                const uint64_t currLayerBlock = blockIndices[q]>>(currStepLog-1);
+                const uint64_t currTwin = currLayerBlock ^ 1UL;
+                const uint64_t TwinLocation = currTwin*currStep;
                 res[q].push_back(data[TwinLocation]);
             }
         }
@@ -352,13 +352,13 @@ vector<path_t> getPathToBlocksInPlace(void * dataInp, const short src_logLen, co
     return res;
 }
 
-bool verifyPathToBlock(void const*const blockData, const hashDigest_t& root, const path_t& path, const size_t blockIndex){
+bool verifyPathToBlock(void const*const blockData, const hashDigest_t& root, const path_t& path, const uint64_t blockIndex){
     const short firstRow_logLen = path.size();
-    size_t curr_offset = (1UL<<firstRow_logLen) + (blockIndex>>1);
+    uint64_t curr_offset = (1UL<<firstRow_logLen) + (blockIndex>>1);
 
     auto currHash = hash(blockData);
 
-    for(size_t i=0; i < path.size(); i++){
+    for(uint64_t i=0; i < path.size(); i++){
         hashDigest_t hash_src[2];
         hash_src[(curr_offset&1UL) ^ 1UL] = path[i];
         hash_src[(curr_offset&1UL)] = currHash;
@@ -377,23 +377,23 @@ bool verifyPathToBlock(void const*const blockData, const hashDigest_t& root, con
 // data needed to pass to show consistency of many queried elements
 // with the commitment
 //
-bool SparceMerkleLayer::hasElement(const size_t idx)const{
+bool SparceMerkleLayer::hasElement(const uint64_t idx)const{
     return (data_.find(idx) != data_.end());
 }
 
-void SparceMerkleLayer::addEntry(const size_t idx, const hashDigest_t& data){
+void SparceMerkleLayer::addEntry(const uint64_t idx, const hashDigest_t& data){
     data_[idx] = data;
 }
 
-void SparceMerkleLayer::deleteEntry(const size_t idx){
+void SparceMerkleLayer::deleteEntry(const uint64_t idx){
     data_.erase(data_.find(idx));
 }
 
-const hashDigest_t& SparceMerkleLayer::readData(const size_t idx)const{
+const hashDigest_t& SparceMerkleLayer::readData(const uint64_t idx)const{
     return data_.at(idx);
 }
 
-hashDigest_t SparceMerkleLayer::hashPair(const size_t idx)const{
+hashDigest_t SparceMerkleLayer::hashPair(const uint64_t idx)const{
     hashDigest_t src[2];
     src[0] = readData(idx<<1);
     src[1] = readData((idx<<1)^1UL);
@@ -412,7 +412,7 @@ SparceMerkleLayer SparceMerkleLayer::calculateNextLayer(const SparceMerkleLayer&
         if(!needToCalc){
             continue;
         }
-        const size_t currPairIdx = v.first>>1;
+        const uint64_t currPairIdx = v.first>>1;
         res.addEntry(currPairIdx, hashPair(currPairIdx));
     }
     return res;
@@ -426,8 +426,8 @@ std::vector<hashDigest_t> SparceMerkleLayer::toVector()const{
     return res;
 }
 
-std::set<size_t> SparceMerkleLayer::getIndices()const{
-    std::set<size_t> res;
+std::set<uint64_t> SparceMerkleLayer::getIndices()const{
+    std::set<uint64_t> res;
     for( const auto& e : data_){
         res.insert(e.first);
     }
@@ -452,7 +452,7 @@ std::vector<hashDigest_t> SparceMerkleTree::toVector()const{
 }
 
 //De serialization
-void SparceMerkleTree::DeSerialize(const std::set<size_t>& queriedIndices, const std::vector<hashDigest_t>& serializedSubtree){
+void SparceMerkleTree::DeSerialize(const std::set<uint64_t>& queriedIndices, const std::vector<hashDigest_t>& serializedSubtree){
     
     const auto serializationMapping = getSerializationMapping(queriedIndices);
     _COMMON_ASSERT(serializationMapping.size() == serializedSubtree.size(), 
@@ -462,26 +462,26 @@ void SparceMerkleTree::DeSerialize(const std::set<size_t>& queriedIndices, const
     }
 }
 
-std::vector< std::pair<short,size_t> > SparceMerkleTree::getSerializationMapping(const std::set<size_t>& queriedIndices)const{
-    std::vector< std::pair<short,size_t> > res;
+std::vector< std::pair<short,uint64_t> > SparceMerkleTree::getSerializationMapping(const std::set<uint64_t>& queriedIndices)const{
+    std::vector< std::pair<short,uint64_t> > res;
     
     //A partial mapping from index that can be calculated
     //to whether it is explicit in the serialized subtree (true)
     //or implied by lower layer (false)
-    std::map<size_t,bool> knownIndices;
+    std::map<uint64_t,bool> knownIndices;
 
-    for(const size_t& idx : queriedIndices){
+    for(const uint64_t& idx : queriedIndices){
         knownIndices[idx] = true;
         knownIndices[idx^1UL] = true;
     }
 
     for(unsigned short layerIdx = 0; layerIdx <  layers_.size(); layerIdx++){
-        std::map<size_t,bool> next_knownIndices;
+        std::map<uint64_t,bool> next_knownIndices;
         for(const auto& known : knownIndices){
             
             if(known.second == true){
                 //If current data is explicit in subtree, it must be fetched from serialization
-                res.push_back(std::pair<short,size_t>(layerIdx,known.first));
+                res.push_back(std::pair<short,uint64_t>(layerIdx,known.first));
             }
             
             //Any case, the hash of current data and its mate
@@ -492,7 +492,7 @@ std::vector< std::pair<short,size_t> > SparceMerkleTree::getSerializationMapping
         //Any element in next known indices that is known must have its mate
         //known as well, thus if it is not known implicitly it must be passed explicitly
         //in the serialization
-        std::vector<size_t> explictlyKnown;
+        std::vector<uint64_t> explictlyKnown;
         for(const auto& k : next_knownIndices){
             if (next_knownIndices.count(k.first^1UL) == 0){
                 explictlyKnown.push_back(k.first^1UL);
@@ -509,12 +509,12 @@ std::vector< std::pair<short,size_t> > SparceMerkleTree::getSerializationMapping
     return res;
 }
 
-void SparceMerkleTree::addPath(const std::array<hashDigest_t,2>& data, const path_t& path, const size_t pairIdx){
+void SparceMerkleTree::addPath(const std::array<hashDigest_t,2>& data, const path_t& path, const uint64_t pairIdx){
     layers_[0].addEntry(pairIdx<<1,data[0]);
     layers_[0].addEntry((pairIdx<<1)^1UL,data[1]);
     
-    size_t currIdx = pairIdx;
-    for(size_t i=1; i< layers_.size(); i++){
+    uint64_t currIdx = pairIdx;
+    for(uint64_t i=1; i< layers_.size(); i++){
 
         //just write the path
         layers_[i].addEntry(currIdx^1UL,path[i-1UL]);
@@ -536,11 +536,11 @@ hashDigest_t SparceMerkleTree::calculateRoot()const{
     return rootCalculated;
 }
 
-bool SparceMerkleTree::hasData(const size_t idx)const{
+bool SparceMerkleTree::hasData(const uint64_t idx)const{
     return layers_[0].hasElement(idx);
 }
 
-const hashDigest_t& SparceMerkleTree::readData(const size_t idx)const{
+const hashDigest_t& SparceMerkleTree::readData(const uint64_t idx)const{
     return layers_[0].readData(idx);
 }
 

@@ -9,32 +9,32 @@ namespace AES160LOCIhashchain {
 #ifndef DBGwitness
 #define DBGGET(a,b,c) (a)[(b)][(c)]
 #else
-	std::set<std::pair<size_t, int>> dbgSet;
-	inline FieldElement& DBGGET(witnessType a, size_t row, int column) {
-		std::pair<size_t, int> tmp = std::pair<size_t, int>(row, column);
+	std::set<std::pair<uint64_t, int>> dbgSet;
+	inline FieldElement& DBGGET(witnessType a, uint64_t row, int column) {
+		std::pair<uint64_t, int> tmp = std::pair<uint64_t, int>(row, column);
 		dbgSet.insert(tmp);
 		return a[row][column];
 	}
 #endif
 
-	void isZeroDigitCompute(witnessType arr, size_t t, FieldElement NUM, reg::RegType BIT, reg::RegType W, int digit) {
-		if ((size_t(1) << digit) & mapFieldElementToInteger(0, EXTDIM, NUM)) {
+	void isZeroDigitCompute(witnessType arr, uint64_t t, FieldElement NUM, reg::RegType BIT, reg::RegType W, int digit) {
+		if ((uint64_t(1) << digit) & mapFieldElementToInteger(0, EXTDIM, NUM)) {
 			DBGGET(arr, t, BIT) = one();
-			DBGGET(arr, t, W) = extractBit(mapIntegerToFieldElement(0, EXTDIM, size_t(1) << digit)*arr[t][BIT] + NUM, digit);
+			DBGGET(arr, t, W) = extractBit(mapIntegerToFieldElement(0, EXTDIM, uint64_t(1) << digit)*arr[t][BIT] + NUM, digit);
 		}
 		else {
 			DBGGET(arr, t, BIT) = zero();
 			DBGGET(arr, t, W) = extractBit(NUM, digit);
 		}
 	}
-	void SaveRegisters(witnessType arr, size_t t){
+	void SaveRegisters(witnessType arr, uint64_t t){
 		for (int i = 0; i < NUMREGS; i++){
 			DBGGET(arr, t + 1, i) = arr[t][i];
 		}
 	}
 
 
-	void SubBytesAUX_REG2(witnessType arr, size_t t, int x, size_t resT, int y, int z, int u, int v, int w){
+	void SubBytesAUX_REG2(witnessType arr, uint64_t t, int x, uint64_t resT, int y, int z, int u, int v, int w){
 		DBGGET(arr, t, y) = (arr[t][x] != zero()) ? arr[t][x].inverse() : zero();
 		FieldElement a = arr[t][y];
 		FieldElement b = a*a;
@@ -57,7 +57,7 @@ namespace AES160LOCIhashchain {
 
 	}
 
-	void SubBytesAUX_REGMethodA(witnessType arr, size_t t, reg::RegType regs[], size_t resT, reg::RegType res[], int size){
+	void SubBytesAUX_REGMethodA(witnessType arr, uint64_t t, reg::RegType regs[], uint64_t resT, reg::RegType res[], int size){
 		reg::RegType W = reg::W11;
 		for (int i = 0; i < size; i++){
 			SubBytesAUX_REG2(arr, t, regs[i], resT, (reg::RegType((int)reg::inv1 + i)),
@@ -65,7 +65,7 @@ namespace AES160LOCIhashchain {
 		}
 	}
 
-	void MixColumns(witnessType arr, size_t t){
+	void MixColumns(witnessType arr, uint64_t t){
 		DBGGET(arr, t + 1, reg::X00) = consts::MixColMat[0][0] * arr[t][reg::X00] + consts::MixColMat[0][1] * arr[t][reg::X10]
 			+ consts::MixColMat[0][2] * arr[t][reg::X20] + consts::MixColMat[0][3] * arr[t][reg::X30];
 
@@ -133,7 +133,7 @@ namespace AES160LOCIhashchain {
 	}
 
 
-	size_t loopBody(witnessType arr, size_t t, bool isLastRound = false){
+	uint64_t loopBody(witnessType arr, uint64_t t, bool isLastRound = false){
 		SaveRegisters(arr, t);
 		if (arr[t][reg::FLAG1] == zero() && arr[t][reg::FLAG2] == zero()){
 			if (arr[t][reg::RC] + consts::Rcon_round11 != zero()){
@@ -240,7 +240,7 @@ namespace AES160LOCIhashchain {
 		return t + 1;
 	}
 
-	size_t genWitnessAES160(witnessType arr, size_t t){
+	uint64_t genWitnessAES160(witnessType arr, uint64_t t){
 		DBGMSG("tppppp = " << t << ": flag1 = " << arr[t][reg::FLAG1]);
 		DBGMSG("tppppp = " << t << ": flag2 = " << arr[t][reg::FLAG2]);
 		while (arr[t][reg::RC] != consts::Rcon_round11)
@@ -262,13 +262,13 @@ namespace AES160LOCIhashchain {
 	}
 
 
-	size_t computeAES160(witnessType arr){
+	uint64_t computeAES160(witnessType arr){
 		FieldElement RC = one();
 		std::vector<FieldElement> arr2(20);
 		for (int i = 0; i < 20; i++){
 			arr2[i] = arr[0][reg::X00 + i];
 		}
-		size_t t = 0;
+		uint64_t t = 0;
 		for (RC = one(); RC != consts::Rcon_round11*consts::xFETransformed; RC *= consts::xFETransformed){
 
 			reg::RegType regs[8] = { reg::X00, reg::X01, reg::X02, reg::X03, reg::X04 };
@@ -339,7 +339,7 @@ namespace AES160LOCIhashchain {
 	}
 
 
-	size_t genWitnessHashByAES160(witnessType arr, size_t t, size_t stepOfCollapsing){
+	uint64_t genWitnessHashByAES160(witnessType arr, uint64_t t, uint64_t stepOfCollapsing){
 		DBGGET(arr, t, reg::RC) = one();
 		DBGGET(arr, t, reg::STATE) = one();
 		DBGGET(arr, t, reg::FLAG1) = zero();
@@ -401,7 +401,7 @@ namespace AES160LOCIhashchain {
             }
 		}
 		std::vector< std::vector<FieldElement> > myArr2(12, std::vector<FieldElement>(NUMREGS));
-		size_t t = 0;
+		uint64_t t = 0;
 		for (int j = 0; j < 20; j++){
 			myArr2[0][reg::X00 + j] = zero();
 			myArr2[0][reg::K00 + j] = zero();
@@ -427,8 +427,8 @@ namespace AES160LOCIhashchain {
 		return b;
 	}
 
-	size_t genWitness(witnessType arr, const witnessType HashChain, const int N, const FieldElement loci_constants[][2]){
-		size_t t = 0;
+	uint64_t genWitness(witnessType arr, const witnessType HashChain, const int N, const FieldElement loci_constants[][2]){
+		uint64_t t = 0;
 		for (int i = 0; i < NUMREGS; i++){
 			DBGGET(arr, t, i) = zero();
 		}
@@ -575,7 +575,7 @@ namespace AES160LOCIhashchain {
 			loci_pairs[i][j] = (255 == bits) ? Algebra::zero() : power(consts::xFETransformed, bits);
             }
 		}
-		size_t t = genWitness(arr, HashChain, LEN, loci_pairs);
+		uint64_t t = genWitness(arr, HashChain, LEN, loci_pairs);
 		DBGMSG("t = " << t << std::endl);
 		DBGGET(arr, t, reg::PHASE) = one();
 		DBGGET(arr, t, reg::STATE) = xFE();

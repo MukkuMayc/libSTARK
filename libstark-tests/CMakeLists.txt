@@ -1,17 +1,6 @@
-include(GoogleTest)
-enable_testing()
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIR})
+set(LIBS libstark gtest)
 
 include_directories(.)
-
-set(LIBS libstark ${GTEST_LIBRARIES})
-
-# file(GLOB_RECURSE ${TEST_SRC_FILES} RELATIVE
-# 	${PROJECT_SOURCE_DIR}/libstark-tests
-# 	libstark-tests/*.cpp
-# 	# libstark-tests/*/*.cpp
-# )
 
 set(TEST_SRC_FILES
 	main.cpp
@@ -30,8 +19,6 @@ set(TEST_SRC_FILES
 	BairToAcsp/AcspSummandsPolynomial_UTEST.cpp
 )
 
-# message(STATUS "Test case source files: " ${TEST_SRC_FILES})
-
 add_executable(libstark-tests
 	main.cpp
 	MerkleCommitment_UTEST.cpp
@@ -49,6 +36,7 @@ add_executable(libstark-tests
 	BairToAcsp/AcspSummandsPolynomial_UTEST.cpp
 )
 
-gtest_add_tests(TARGET libstark-tests)
+
+add_test(NAME libstark-tests-test COMMAND libstark-tests)
 
 target_link_libraries(libstark-tests ${LIBS})

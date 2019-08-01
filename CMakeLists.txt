@@ -22,15 +22,17 @@ set(TINYRAM_TESTS_DIR ${PROJECT_SOURCE_DIR}/tinyram/stark-tinyram-tests)
 set(LIBS gadgetlib fft algebralib libstark)
 set(TESTS algebralib-tests libstark-tests stark-tinyram-tests)
 
-add_subdirectory(${GTEST_DIR} bin/_googletest)
 add_subdirectory(${FFTLIB_DIR} bin/fftlib)
 add_subdirectory(${ALGEBRALIB_DIR} bin/algebralib)
-# add_subdirectory(${LIBSTARK_DIR} bin/libstark)
-# add_subdirectory(${GADGETLIB3_DIR} bin/gadgetlib)
+add_subdirectory(${LIBSTARK_DIR} bin/libstark)
+add_subdirectory(${GADGETLIB3_DIR} bin/gadgetlib)
 
-# add_subdirectory(${TINYRAM_DIR})
+add_subdirectory(${TINYRAM_DIR})
 # add_subdirectory(${DPM_DIR})
 
+add_subdirectory(${GTEST_DIR} bin/_googletest)
 add_subdirectory(${ALGEBRALIB_TESTS_DIR})
-# add_subdirectory(${LIBSTARK_TESTS_DIR})
-# add_subdirectory(${TINYRAM_TESTS_DIR})
+add_subdirectory(${LIBSTARK_TESTS_DIR})
+add_subdirectory(${TINYRAM_TESTS_DIR})
+
+# add_subdirectory(onetest)

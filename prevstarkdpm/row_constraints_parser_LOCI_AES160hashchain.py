@@ -534,7 +534,7 @@ def poly_to_cpp_is_used_var(poly_str):
 
     usedVars = re.compile('[^()*+]+').findall(poly_str_fixed)
 
-    res_cpp = """bool isEffectiveInput(const size_t varId)const{
+    res_cpp = """bool isEffectiveInput(const uint64_t varId)const{
         switch(varId)
         {
             """

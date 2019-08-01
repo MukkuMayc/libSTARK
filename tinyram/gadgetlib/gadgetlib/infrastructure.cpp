@@ -28,7 +28,7 @@ namespace gadgetlib {
 	/********************************************************/
 
 #ifdef DEBUG
-	const static size_t MAX_FMT = 256;
+	const static uint64_t MAX_FMT = 256;
 	::std::string GADGETLIB3_FMT(const char* format, ...) {
 		char buf[MAX_FMT];
 		va_list args;

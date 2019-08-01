@@ -108,7 +108,7 @@ FFT::FFT(Basis& b, const fft_operation_t operation) :
         }
 #ifdef __GPU
 		if(j+1 <= Chunk::log_elements_in_chunk){
-			for(size_t i = 0 ; i < (1UL<<(Chunk::log_elements_in_chunk-(j+1))); ++i){
+			for(uint64_t i = 0 ; i < (1UL<<(Chunk::log_elements_in_chunk-(j+1))); ++i){
 				memcpy(&(E.e[i<<(j+1)]),exps[b_size-j-1],sizeof(Element)*(1UL<<(j+1)));
 			}
 			Chunk::normalToChunk(&E,gpu_exp[b_size-j-1],1,true);
@@ -118,7 +118,7 @@ FFT::FFT(Basis& b, const fft_operation_t operation) :
 #endif	// #ifdef __GPU
 #ifdef __GPU
 		if(j+1 <= Chunk::log_elements_in_chunk){
-			for(size_t i = 0 ; i < (1UL<<(Chunk::log_elements_in_chunk-(j+1))); ++i){
+			for(uint64_t i = 0 ; i < (1UL<<(Chunk::log_elements_in_chunk-(j+1))); ++i){
 				memcpy(&(E.e[i<<(j+1)]),i_exps[b_size-j-1],sizeof(Element)*(1UL<<(j+1)));
 			}
 			Chunk::normalToChunk(&E,gpu_i_exp[b_size-j-1],1,true);
@@ -134,8 +134,8 @@ FFT::FFT(Basis& b, const fft_operation_t operation) :
 			Chunk::normalToChunk((Elements_Chunk*)subspaces[b_size-1-j],gpu_subspace[b_size-1-j],1UL<<(j-Chunk::log_elements_in_chunk),true);
 		else
 		{
-			for(size_t i =0  ; i < 1UL<<(j) ; ++i)
-				for(size_t k = 0 ; k < (Chunk::elements_in_chunk>>(j));++k){
+			for(uint64_t i =0  ; i < 1UL<<(j) ; ++i)
+				for(uint64_t k = 0 ; k < (Chunk::elements_in_chunk>>(j));++k){
 					if(!(k&1))
 						Element::c_setZero(E.e[(k<<(j))+i]);
 					else
@@ -151,14 +151,14 @@ FFT::FFT(Basis& b, const fft_operation_t operation) :
 	Element::c_inv(lastD,i_lastD);
 	this->lastShift = d_shift;
 #ifdef __GPU
-	for(size_t i = 0 ; i < (Chunk::elements_in_chunk) ; i+=2){
+	for(uint64_t i = 0 ; i < (Chunk::elements_in_chunk) ; i+=2){
 		E.e[i] = lastShift;
 		Element::c_add(lastShift,lastD,E.e[i+1]);
 	}
 	Chunk::normalToChunk(&E,&linear_mul,1,true);
 	E.e[1]=i_lastD;
 	Element::c_mul(E.e[1],lastShift,E.e[0]);
-	for(size_t i = 2 ; i < (Chunk::elements_in_chunk) ; i+=2){
+	for(uint64_t i = 2 ; i < (Chunk::elements_in_chunk) ; i+=2){
 		E.e[i]=E.e[0];
 		E.e[i+1]=E.e[1];
 	}
@@ -317,7 +317,7 @@ void FFT::AlgIFFT(Element* P){
 		len_t half_g_len = 1UL<<(log_g_len-1);
 		for(idx_t j = 0; j<(1UL<<size) ; j+=(1UL<<log_g_len)){
 			G=&P[j];
-			for(size_t i = 0 ; i < half_g_len ; ++i)
+			for(uint64_t i = 0 ; i < half_g_len ; ++i)
 			{
 				Element::c_add(G[i],G[i+half_g_len],G[i+half_g_len]);
 				Element::c_mulXor(G[i+half_g_len],t[i],G[i]);
@@ -334,7 +334,7 @@ void FFT::AlgIFFT(Element* P){
 			for(idx_t j = 0; j<(1UL<<size) ; j+=(1UL<<log_g_len)){
 				tid = 0; // omp_get_thread_num();
 				G=&P[j];
-				for(size_t i = 0 ; i < half_g_len ; ++i)
+				for(uint64_t i = 0 ; i < half_g_len ; ++i)
 				{
 					Element::c_add(G[i],G[i+half_g_len],G[i+half_g_len]);
 					Element::c_mulXor(G[i+half_g_len],subspaces[size-log_g_len][i],G[i]);
@@ -353,7 +353,7 @@ void FFT::AlgIFFT(Element* P){
 					tid = 0; // omp_get_thread_num();
 					low = (half_g_len*tid); // /omp_get_num_threads();
 					high = (half_g_len*(tid+1)); // /omp_get_num_threads();
-					for(size_t i = low ; i < high ; ++i)
+					for(uint64_t i = low ; i < high ; ++i)
 					{
 						Element::c_add(P[j+i],P[j+i+half_g_len],P[j+i+half_g_len]);
 						Element::c_mulXor(P[j+i+half_g_len],subspaces[size-log_g_len][i],P[j+i]);
@@ -370,7 +370,7 @@ void FFT::AlgIFFT(Element* P){
 		len_t half_g_len = 1UL<<(log_g_len-1);
 		for(idx_t j = 0; j<(1UL<<size) ; j+=(1UL<<log_g_len)){
 			G=&P[j];
-			for(size_t i = 0 ; i < half_g_len ; ++i)
+			for(uint64_t i = 0 ; i < half_g_len ; ++i)
 			{
 				Element::c_mulXor(G[i+half_g_len],t[i],G[i]);
 				Element::c_add(G[i],G[i+half_g_len],G[i+half_g_len]);
@@ -387,7 +387,7 @@ void FFT::AlgIFFT(Element* P){
 			for(idx_t j = 0; j<(1UL<<size) ; j+=(1UL<<log_g_len)){
 				tid = 0; // omp_get_thread_num();
 				G=&P[j];
-				for(size_t i = 0 ; i < half_g_len ; ++i)
+				for(uint64_t i = 0 ; i < half_g_len ; ++i)
 				{
 					Element::c_mulXor(G[i+half_g_len],subspaces[size-log_g_len][i],G[i]);
 					Element::c_add(G[i],G[i+half_g_len],G[i+half_g_len]);
@@ -439,7 +439,7 @@ void FFT::AlgIFFT(Element* P){
 				it=c_p_cpy;
 				p_cpy=P;
 			}
-			for( size_t j = 0; j < (1UL<<(size-i)) ; ++j)
+			for( uint64_t j = 0; j < (1UL<<(size-i)) ; ++j)
 			{
 				private_it = it+ j*(1UL<<i);
 				iGPartition_cpu(private_it,i,p_cpy+(j<<i));
@@ -470,8 +470,8 @@ void FFT::AlgIFFT(Element* P){
 			}
 		}
 		if(min_log_general_level <= size-1){
-            const size_t step = 1UL << (size - min_log_general_level);
-            const size_t bound = 1UL<<size;
+            const uint64_t step = 1UL << (size - min_log_general_level);
+            const uint64_t bound = 1UL<<size;
 // #pragma omp parallel for
 			for (plooplongtype i = 0; i < bound; i+=step){
 				FFT::ifft_serial(P+i,size-min_log_general_level,c_p_cpy_local+i);
@@ -528,7 +528,7 @@ void FFT::AlgIFFT(Element* P){
 				it=P;
 				p_cpy=c_p_cpy;
 			}
-			for( size_t j = 0; j < (1UL<<(size-i)) ; ++j)
+			for( uint64_t j = 0; j < (1UL<<(size-i)) ; ++j)
 			{
 				private_it = it+ j*(1UL<<i);
 				Element::c_vecMul(exps[orig_size-i],private_it,private_it,1UL<<i);
@@ -539,7 +539,7 @@ void FFT::AlgIFFT(Element* P){
 		if(p_cpy!=P) {
 			memcpy(P,p_cpy,sizeof(Element)*(1UL<<size));
 		}
-		for(size_t i = 1 ; i <= (1UL<<size); i+=2){
+		for(uint64_t i = 1 ; i <= (1UL<<size); i+=2){
 			Element::c_mulXor(P[i],lastShift,P[i-1]);
 			Element::c_mul(P[i],lastD,P[i]);
 			Element::c_add(P[i],P[i-1],P[i]);
@@ -576,8 +576,8 @@ void FFT::AlgIFFT(Element* P){
 		it-=(1UL<<size);
 		}
 		if(min_log_general_levels <= size-1){
-            const size_t step = 1UL << (size - min_log_general_levels);
-            const size_t bound = 1UL<<size;
+            const uint64_t step = 1UL << (size - min_log_general_levels);
+            const uint64_t bound = 1UL<<size;
 // #pragma omp parallel for
 			for (plooplongtype i = 0; i < bound; i += step){
 				FFT::fft_serial(p_cpy+i,size-min_log_general_levels,it+i);

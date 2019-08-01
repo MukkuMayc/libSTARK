@@ -12,8 +12,8 @@ namespace ACSP_FOR_AES160LOCIhashchain{
 		AES160LOCIhashchain_CS();
     
     /// the amount of inputs each polynomial expects
-    size_t numVars() const{return 2*AES160LOCIhashchain::NUMREGS;}
-    size_t numMappings() const{return polys_.size();}
+    uint64_t numVars() const{return 2*AES160LOCIhashchain::NUMREGS;}
+    uint64_t numMappings() const{return polys_.size();}
     
     AES160LOCIhashchain_CS* clone() const;
 

@@ -28,9 +28,9 @@ target_link_options(tinyram-lib PUBLIC ${LINK_FLAGS})
 
 target_link_libraries(tinyram-lib  ${LIBS})
 
-set(LIBS ${LIBS} tinyram-lib)
-
 target_include_directories(tinyram-lib PUBLIC src)
+
+set(LIBS ${LIBS} tinyram-lib)
 
 add_executable(${PROJECT_NAME}
         src/main.cpp

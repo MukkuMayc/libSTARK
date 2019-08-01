@@ -58,13 +58,13 @@ UnivariatePolynomialGeneral::UnivariatePolynomialGeneral(const vector<FieldEleme
 UnivariatePolynomialGeneral::UnivariatePolynomialGeneral(const evaluation_t& evaluationTabel, const elementsSet_t& spaceBasis){
     
     const short basisSize = spaceBasis.size();
-    const size_t spaceSize = (1<<basisSize);
+    const uint64_t spaceSize = (1<<basisSize);
     vector<FieldElement> orderedBasis;
     for(const auto& b : spaceBasis) orderedBasis.push_back(b);
 
     //construct the evaluation
     vector<FieldElement> vals(spaceSize);
-    for(size_t i=0; (i>>basisSize)==0; i++){
+    for(uint64_t i=0; (i>>basisSize)==0; i++){
         const auto iter = evaluationTabel.find(getSpaceElementByIndex(orderedBasis, zero(), i));
         ALGEBRALIB_ASSERT(iter != evaluationTabel.end(),"Bad evaluation table, impossible interpolation");
         vals[i] = iter->second;
@@ -125,7 +125,7 @@ namespace{
 UnivariatePolynomialInterface* UnivariatePolynomialGeneral::eval(const UnivariatePolynomialInterface& p)const{
 	const PolynomialDegree::integral_t maxDeg(degreeOfComposition(getDegree(), p.getDegree()));
 
-    const size_t evalSpaceDim = ceil(Log2(maxDeg+1));
+    const uint64_t evalSpaceDim = ceil(Log2(maxDeg+1));
     const elementsSet_t basisSet = getStandartBasis(evalSpaceDim);
     const vector<FieldElement> evalSpaceBasis(basisSet.begin(),basisSet.end());
     vector<FieldElement> evaluation(1L<<evalSpaceDim);
@@ -241,7 +241,7 @@ void UnivariatePolynomialGeneral::multiply(const UnivariatePolynomialGeneral& ot
     }
     
     //else find a big enough evaluation space
-    const size_t space_dim = ceil(log2(1+ PolynomialDegree::integral_t(degreeBound)));
+    const uint64_t space_dim = ceil(log2(1+ PolynomialDegree::integral_t(degreeBound)));
     const auto basis = getStandartBasis(space_dim);
     vector<FieldElement> orderedBasis(basis.begin(),basis.end());
 
@@ -269,7 +269,7 @@ void UnivariatePolynomialGeneral::multiply(const FieldElement& factor){
     }
 }
 
-void UnivariatePolynomialGeneral::multiply_by_monomial(const FieldElement& factor, const size_t deg){
+void UnivariatePolynomialGeneral::multiply_by_monomial(const FieldElement& factor, const uint64_t deg){
     multiply(factor);
     const vector<FieldElement> padding(deg,zero());
     polynomial_.insert(polynomial_.begin(),padding.begin(),padding.end());
@@ -283,7 +283,7 @@ void UnivariatePolynomialGeneral::add(const UnivariatePolynomialGeneral& other){
 
     //otherwise, the other polynomial has effective coefficients.
     //extend current poly len if needed
-    const size_t otherNumCoeffs = 1+PolynomialDegree::integral_t(degOfOther);
+    const uint64_t otherNumCoeffs = 1+PolynomialDegree::integral_t(degOfOther);
     if(polynomial_.size() < otherNumCoeffs){
         polynomial_.resize(otherNumCoeffs,zero());
     }
@@ -341,8 +341,8 @@ bool operator==(const UnivariatePolynomialGeneral& a, const UnivariatePolynomial
     const PolynomialDegree bDeg = b.getDegree();
     if(aDeg != bDeg)return false;
 
-    const size_t numCoeffs = max(PolynomialDegree::integral_t(0),1+PolynomialDegree::integral_t(aDeg));
-    for(size_t i=0; i< numCoeffs; i++){
+    const uint64_t numCoeffs = max(PolynomialDegree::integral_t(0),1+PolynomialDegree::integral_t(aDeg));
+    for(uint64_t i=0; i< numCoeffs; i++){
         if(a.getCoefficient(i) != b.getCoefficient(i))return false;
     }
 

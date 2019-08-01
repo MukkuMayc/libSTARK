@@ -37,7 +37,7 @@ libstark::BairInstance constructInstance(const TinyRAMProgram& prog, const unsig
 
     unique_ptr<cs2BairConstraints> cs2bairConstraints_(new cs2BairConstraints(cs2bair_instance));
     unique_ptr<cs2BairMemoryCS> cs2bairMemoryCS_(new cs2BairMemoryCS(cs2bair_instance));
-    size_t numVars = (cs2bairConstraints_->numVars() / 2);
+    uint64_t numVars = (cs2bairConstraints_->numVars() / 2);
     return libstark::BairInstance(
             numVars,
             t,

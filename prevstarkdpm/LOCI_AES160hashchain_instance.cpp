@@ -11,8 +11,8 @@ class empty_CS : public libstark::ConstraintSys{
     public:
 
     /// the amount of inputs each polynomial expects
-	size_t numVars() const{ return 2 * AES160LOCIhashchain::NUMREGS; }
-    size_t numMappings() const{return polys.size();}
+	uint64_t numVars() const{ return 2 * AES160LOCIhashchain::NUMREGS; }
+    uint64_t numMappings() const{return polys.size();}
     empty_CS* clone() const{return new empty_CS();}
 
     /// the constraint polynomials
@@ -37,7 +37,7 @@ libstark::BairInstance buildBairInstance(const AES160LOCIhashcCommonParams& para
     using Algebra::mapIntegerToFieldElement;
     using libstark::BairInstance;
 
-	const size_t vectorsLen = AES160LOCIhashchain::NUMREGS;
+	const uint64_t vectorsLen = AES160LOCIhashchain::NUMREGS;
     const short domainSizeIndicator = AES160LOCIhashchain::getDim(params.length);
 	BairInstance::constraintsPtr_t constraints_assignment(new AES160LOCIhashchain_CS());
     BairInstance::constraintsPtr_t constraints_permutation(new empty_CS());
