@@ -1,1 +1,1 @@
-"SHELL:-s WASM=0" "SHELL:-s DISABLE_EXCEPTION_CATCHING=0" "SHELL: -s ALLOW_MEMORY_GROWTH=1"
+"SHELL:-s WASM=1" "SHELL:-s EXCEPTION_DEBUG=1" "SHELL:-s DISABLE_EXCEPTION_CATCHING=0" "SHELL: -s ALLOW_MEMORY_GROWTH=1" -g4 --preload-file /home/sergo/Documents/libstark/_build/tinyram/stark-tinyram/examples-tinyram/collatz.asm
