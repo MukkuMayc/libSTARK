@@ -1,1 +1,0 @@
-'examples-tinyram/collatz.asm', '-t10', '-s120'
