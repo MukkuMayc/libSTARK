@@ -79,6 +79,9 @@ Execution:
 ./bin/stark-tinyram-tests/stark-tinyram-tests
 ```
 
+### Compiling to wasm
+
+
 ## Academic literature (partial list, reverse chronological order)
 
 1. Scalable perfect zero knowledge IOP systems [[BCGV](https://link.springer.com/chapter/10.1007%2F978-3-662-49099-0_2), [BCFGRS](https://link.springer.com/chapter/10.1007%2F978-3-319-70503-3_6)].
