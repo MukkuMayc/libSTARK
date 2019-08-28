@@ -80,6 +80,11 @@ Execution:
 ```
 
 ### Compiling to wasm
+1. Install emscripten and add it to PATH
+https://emscripten.org/docs/getting_started/downloads.html
+1. Run build_emscripten.sh
+
+stark-tinyram.js is located at _build/tinyram/stark-tinyram.
 
 
 ## Academic literature (partial list, reverse chronological order)
