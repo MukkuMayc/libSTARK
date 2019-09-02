@@ -1,0 +1,83 @@
+Executing simulation with assembly from test.asm over 2^3-1 steps, and soundness error at most 2^-3
+------------------------------------------------------------
+| BAIR Specifications                                      |
+------------------------------------------------------------
+| field size                                     = 2^64    |
+| number of variables per state (w)              = 93      |
+| number of regular constraints (s)              = 87      |
+| number of permutation constraints              = 0       |
+| number of cycles (c)                           = (2^3)-1 |
+| degree of constraint system (d)                = 8       |
+| degree of permutation constraint system        = -1      |
+| number of boundary constraints (B)             = 6       |
+| number of variables used by constraint systems = 91      |
+| number of variables routed                     = 0       |
+| number of variables not routed                 = 93      |
+------------------------------------------------------------
+-------------------------------------------------
+| ACSP Specifications                           |
+-------------------------------------------------
+| field size                             = 2^64 |
+| number of algebraic-registers (|\Tau|) = 93   |
+| number of neighbors (|N|)              = 133  |
+| vanishing space size                   = 2^4  |
+| composition degree bound               = 136  |
+-------------------------------------------------
+-------------------------------------------------------------
+| APR Specifications                                        |
+-------------------------------------------------------------
+| field size                                       = 2^64   |
+| number of algebraic-registers (|\Tau|)           = 93     |
+| number of neighbors (|N|)                        = 133    |
+| witness (f) evaluation space size (|L|)          = 2^12   |
+| constraint (g) evaluation space size (|L_{cmp}|) = 2^10   |
+| witness (f) maximal rate (\rho_{max})            = 2^{-8} |
+| constraint (g) rate (\rho_{cmp})                 = 2^{-3} |
+| zero knowledge parameter (k)                     = 1      |
+| rate parameter (R)                               = 3      |
+| constraints degree log (d)                       = 7      |
+-------------------------------------------------------------
+Constructing APR (ACSP) witness:....(0.870834 seconds)
+-----------------------------------------
+| FRI for witness (f) specifications #1 |
+-----------------------------------------
+| field size (|F|)      = 2^64          |
+| RS code dimension     = 2^4           |
+| RS block-length       = 2^12          |
+| RS code rate          = 2^-{8}        |
+| Soundness error       = 2^-{4}        |
+| dim L_0 (eta)         = 2             |
+| recursion depth       = 2             |
+| COMMIT repetitions    = 1             |
+| number of tests (ell) = 1             |
+-----------------------------------------
+---------------------------------------------
+| FRI for constraints (g) specifications #1 |
+---------------------------------------------
+| field size (|F|)      = 2^64              |
+| RS code dimension     = 2^7               |
+| RS block-length       = 2^10              |
+| RS code rate          = 2^-{3}            |
+| Soundness error       = 2^-{4}            |
+| dim L_0 (eta)         = 2                 |
+| recursion depth       = 3                 |
+| COMMIT repetitions    = 1                 |
+| number of tests (ell) = 2                 |
+---------------------------------------------
+communication iteration #1:.(0.0101097 seconds)
+communication iteration #2:.(0.0174516 seconds)
+communication iteration #3:(0.00023415 seconds)
+communication iteration #4:(0.000181674 seconds)
+communication iteration #5:(0.000125036 seconds)
+communication iteration #6:(0.000114064 seconds)
+communication iteration #7:(0.000727171 seconds)
+Verifier decision: ACCEPT
+------------------------------------------------------------------------
+| Protocol execution measurements                                      |
+------------------------------------------------------------------------
+| Prover time                                       = 0.024275 Seconds |
+| Verifier time                                     = 0.001761 Seconds |
+| Total IOP length                                  = 8.187513 MBytes  |
+| Total communication complexity (STARK proof size) = 17.421875 KBytes |
+| Query complexity                                  = 13.601562 KBytes |
+------------------------------------------------------------------------

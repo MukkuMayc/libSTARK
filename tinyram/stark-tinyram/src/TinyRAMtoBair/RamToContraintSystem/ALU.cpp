@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 #include <algebraLib/variable_operators.hpp>
 #include <algebraLib/FieldElement.hpp>
@@ -1706,6 +1707,7 @@ void ALU_STOREW_Gadget::generateWitness(){
 	pb_->val(results_.isLoadOp_) = Algebra::zero();
 	FElem memoryAddress = pb_->val(inputs_.arg2_val_);
 	FElem value = pb_->val(inputs_.dest_val_);
+	std::cout<<"new cash is : "<<value<<std::endl;
 	// Stores arg2 To dest_val
 	pb_->storeValue(memoryAddress, value);
 	pb_->val(results_.value_) = value;
@@ -1741,6 +1743,7 @@ void ALU_LOADW_Gadget::generateConstraints(){
 	pb_->addGeneralConstraint(inputs_.flag_ + results_.flag_, "inputs_.flag = results.flag_", Opcode::LOADW);
 }
 
+
 void ALU_LOADW_Gadget::generateWitness(){
 	initGeneralOpcodes(pb_);
 	initMemResult(pb_, results_);
@@ -1748,6 +1751,7 @@ void ALU_LOADW_Gadget::generateWitness(){
 	pb_->val(results_.isMemOp_) = Algebra::one();
 	FElem address = pb_->val(inputs_.arg2_val_); // stores [A] to r_1 - check traceConsistency
 	FElem value = pb_->loadValue(address);
+	std::cout<<value<<std::endl; 
 	pb_->val(results_.address_) = address;
 	pb_->val(results_.value_) = value;
 	pb_->val(results_.flag_) = pb_->val(inputs_.flag_);
@@ -1789,10 +1793,16 @@ void ALU_ANSWER_Gadget::generateWitness(){
 		flag = false;
 		if (Algebra::one() == program_output)
 			program_output = pb_->val(inputs_.arg2_val_);
-		/*
-         * uint64_t a = mapFieldElementToInteger(0, EXTDIM, pb_->val(inputs_.arg2_val_));
-         * std::cout << "\n*** TIMESTEPS=" << max_timestep << " ANSWER=" << a << " (binary " << std::bitset<REGISTER_LENGTH>(a) << ")\n" << std::endl;
-         */
+
+		if (mapFieldElementToInteger(0, EXTDIM, pb_->val(inputs_.arg2_val_))==0) {
+		    std::cout<<"can make this transaction"<<std::endl;
+		}
+		else {
+		    std::cout<<"can't make this transaction"<<std::endl;
+		}
+//		uint64_t a = mapFieldElementToInteger(0, EXTDIM, pb_->val(inputs_.arg2_val_));
+//		std::cout << "\n*** TIMESTEPS=" << max_timestep << " ANSWER=" << a << " (binary " << std::bitset<REGISTER_LENGTH>(a) << ")\n" << std::endl;
+
 	}
 }
 
@@ -1824,6 +1834,10 @@ void ALU_MOV_Gadget::generateWitness(){
 	initMemResult(pb_, results_);
 	pb_->val(results_.flag_) = pb_->val(inputs_.flag_);
 	pb_->val(results_.result_) = pb_->val(inputs_.arg2_val_);
+//	std::cout<<pb_<<"pb suck"<<std::endl;
+//	shared_ptr<Protoboard> pb_suck = pb_;
+//  Protoboard suck_val = *pb_suck;
+//  std::cout << suck_val << "Suckval" << endl;
 }
 
 /*************************************************************************************************/
