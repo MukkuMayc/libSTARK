@@ -11,3 +11,5 @@ stark-dpm-output.txt
 stark-tinyram-output.txt
 threads_num.txt
 **/condoub.txt
+dd_script/test.asm
+*.pyc
