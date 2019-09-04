@@ -1,5 +1,20 @@
 MOV r1 r0 10
 MOV r2 r0 10
+<<<<<<< HEAD
+MOV r3 r0 10
+MOV r8 r0 1
+ADD r4 r1 r2
+CMPAE r0 r1 r3
+CNJMP r0 r0 16
+SUB r5 r1 r3
+ADD r6 r2 r3
+ADD r7 r5 r6
+CMPAE r0 r4 r7
+CNJMP r0 r0 16
+MOV r8 r0 0
+STOREW r5 r0 1
+STOREW r6 r0 2
+=======
 MOV r3 r0 50
 MOV r8 r0 1
 ADD r4 r1 r2
@@ -11,4 +26,5 @@ ADD r7 r5 r6
 CMPAE r4 r7 r0
 CNJMP r0 r0 14
 MOV r8 r0 0
+>>>>>>> 7eab19d9a0d56f8ebb95905f56049b54da9edf33
 ANSWER r0 r0 r8

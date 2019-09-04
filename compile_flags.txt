@@ -1,1 +1,1 @@
--std=c++11 -fmessage-length=0 -g4
+-std=c++11 -fmessage-length=0

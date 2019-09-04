@@ -4,7 +4,10 @@
 *.o
 *.a
 **/bin
+**/__pycache__
 stark-dpm
 stark-tinyram
 stark-dpm-output.txt
 stark-tinyram-output.txt
+threads_num.txt
+**/condoub.txt

@@ -49,7 +49,7 @@ for i in range(quantity_transaction):
 	#create  asm file
 	create_asm_file.create_asm_file(cashFrom, cashTo, cashValue)
 	#create .txt with console duplication for parcing
-	f=open("condoub.txt", 'w') 	
+	f=open("condoub.txt", 'w')
 	#run tinyram
 	subprocess.call(["./../tinyram/stark-tinyram/stark-tinyram", "test.asm", security_param1, security_param2], stdout=f)
 	f.close()
@@ -120,7 +120,7 @@ print("time", "--- %s seconds ---" % (time.time() - startTime))
 # 	# print(linecache.getline('test.asm', 3))
 
 # 	#create .txt with console duplication for parcing
-# 	f=open("condoub.txt", 'w') 	
+# 	f=open("condoub.txt", 'w')
 # 	#run tinyram
 # 	subprocess.call(["./../build/tinyram/stark-tinyram/stark-tinyram", "test.asm", security_param1, security_param2], stdout=f)
 # 	f.close()
