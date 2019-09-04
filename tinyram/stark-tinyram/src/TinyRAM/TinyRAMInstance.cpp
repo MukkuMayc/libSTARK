@@ -146,12 +146,23 @@
         }
     }
 	
-    void TinyRAMProgram::addInstructionsFromFile(const std::string filename){
-        std::ifstream ifs(filename);
-        std::string content((std::istreambuf_iterator<char>(ifs)),std::istreambuf_iterator<char>());
+    // void TinyRAMProgram::addInstructionsFromFile(const std::string filename){
+    //     std::ifstream ifs(filename);
+    //     std::string content((std::istreambuf_iterator<char>(ifs)),std::istreambuf_iterator<char>());
         
-        std::regex regex{R"([\n]+)"}; // split to lines
-        std::sregex_token_iterator it{content.begin(), content.end(), regex, -1};
+    //     std::regex regex{R"([\n]+)"}; // split to lines
+    //     std::sregex_token_iterator it{content.begin(), content.end(), regex, -1};
+    //     std::vector<std::string> lines{it, {}};
+
+    //     for(const auto& l : lines){
+    //         MachineInstruction instruction(l);
+    //         addInstruction(instruction);
+    //     }
+    // }
+
+    void TinyRAMProgram::addInstructionsFromFile(const std::string assemblyCode){
+        std::regex regex{R"([;]+)"}; // split to lines
+        std::sregex_token_iterator it{assemblyCode.begin(), assemblyCode.end(), regex, -1};
         std::vector<std::string> lines{it, {}};
 
         for(const auto& l : lines){

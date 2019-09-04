@@ -1,17 +1,16 @@
 import subprocess
-import linecache
-import os
-import create_asm_file
+from create_tinyram_code import create_tinyram_code
 import test_string_work
 import test_db_script
 import time
+
 #add testing security params
 security_value1 = 5
 security_value2 = 10
 security_param1 = '-t' + str(security_value1)  
 security_param2 = '-s' + str(security_value2)
 #add params for fixed string
-opportiunityTrsnsactionStringNumber = 3
+opportunityTransactionStringNumber = 3
 valueOfFirstUsersCashStringNumber = 1
 valueOfSecondUsersCashStringNumber = 2
 stringOpportunity = "can make this transaction"
@@ -36,21 +35,16 @@ for i in range(quantity_transaction):
 	cashValue = data [4]
 	cashID = data [5]
 
-	#------------------------------------------------------------------------
-	#start tinyRAM with db values
-
-	#create  asm file
-	lines = ''
-	create_asm_file.create_asm_file(cashFrom, cashTo, cashValue)
-		
+	tinyram_code = create_tinyram_code(cashFrom, cashTo, cashValue)
+	
 	#run tinyram
-	p = subprocess.Popen(["./../_build/tinyram/stark-tinyram/stark-tinyram", 'test.asm', security_param1, security_param2], stdout=subprocess.PIPE)
+	p = subprocess.Popen(["./../_build/tinyram/stark-tinyram/stark-tinyram", tinyram_code, security_param1, security_param2], stdout=subprocess.PIPE)
 	output, err = p.communicate()
 	output = output.decode('utf-8')
 	lines = output.split('\n')
 
 	#get string from tunyRAM output
-	inputOpportunityString = lines[opportiunityTrsnsactionStringNumber]
+	inputOpportunityString = lines[opportunityTransactionStringNumber]
 	inputFirstCash = lines[valueOfFirstUsersCashStringNumber]
 	inputSecondCash = lines[valueOfSecondUsersCashStringNumber]
 
@@ -74,9 +68,6 @@ for i in range(quantity_transaction):
 		print("ERROR: can't make transaction")
 		test_db_script.callBackup()
 		break
-
-	os.remove("test.asm")
-	linecache.clearcache()
 
 test_db_script.deleteBackupData()
 test_db_script.printDB()

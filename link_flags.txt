@@ -1,6 +1,1 @@
 -flto
-"SHELL: -s ALLOW_MEMORY_GROWTH=1"
-"SHELL:-s DISABLE_EXCEPTION_CATCHING=0"
-"SHELL: -s WASM=1"
---preload-file /home/daniil/Downloads/libSTARK/dd_script/test.asm@test.asm
---no-heap-copy
