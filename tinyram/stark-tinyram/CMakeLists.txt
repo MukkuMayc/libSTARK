@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(stark-tinyram)
 
-set(BUILD_DIR "bin")
-
 set(LIBS gadgetlib fft algebralib libstark)
 
 add_library(tinyram-lib
@@ -41,4 +39,4 @@ target_link_options(${PROJECT_NAME} PUBLIC ${LINK_FLAGS})
 
 target_link_libraries(${PROJECT_NAME}  ${LIBS})
 
-install(TARGETS ${PROJECT_NAME} DESTINATION .)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_DIR})

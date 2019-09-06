@@ -1,22 +1,24 @@
 #create build dir
-if [ ! -d "_build" ]; then
-    mkdir _build
+BUILD_DIR=build
+if [ ! -d $BUILD_DIR ]; then
+    mkdir $BUILD_DIR
 fi
-cd _build
+cd $BUILD_DIR
 
 #run cmake
-cmake ..
+cmake DCMAKE_INSTALL_PREFIX=_install ..
 
 #set threads number while compilation
 input=../threads_num.txt
-if [ -f "$input" ]; then
-  while IFS= read -r line || [ -n "$line" ]; do
+if [ -f $input ]; then
+  while IFS= read -r line || [ -n $line ]; do
     echo "LINE: $line"
-    threads_num="$line"
-  done < "$input"
+    threads_num=$line
+  done < $input
 else
   threads_num=2
 fi
 
 #compile
-make -j"$threads_num"
+make -j$threads_num
+make install

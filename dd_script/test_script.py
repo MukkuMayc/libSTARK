@@ -40,7 +40,7 @@ for i in range(quantity_transaction):
 	tinyram_code = create_tinyram_code(cashFrom, cashTo, cashValue)
 	
 	#run tinyram
-	p = subprocess.Popen(["./../_build/tinyram/stark-tinyram/stark-tinyram", tinyram_code, security_param1, security_param2], stdout=subprocess.PIPE)
+	p = subprocess.Popen(["./../stark-tinyram", tinyram_code, security_param1, security_param2], stdout=subprocess.PIPE)
 	output, err = p.communicate()
 	output = output.decode('utf-8')
 	lines = output.split('\n')
