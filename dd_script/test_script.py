@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import subprocess
 from create_tinyram_code import create_tinyram_code
 import test_string_work
