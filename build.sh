@@ -6,7 +6,7 @@ fi
 cd $BUILD_DIR
 
 #run cmake
-cmake DCMAKE_INSTALL_PREFIX=_install ..
+cmake ..
 
 #set threads number while compilation
 input=../threads_num.txt
