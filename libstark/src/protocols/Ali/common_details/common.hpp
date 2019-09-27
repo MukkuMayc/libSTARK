@@ -8,6 +8,15 @@
 #include <algebraLib/FieldElement.hpp>
 #include <algebraLib/PolynomialDegree.hpp>
 #include <vector>
+#include "../../json.hpp"
+
+
+#include <string>
+#include <algorithm>
+#include <sstream>
+#include <iterator>
+#include <iostream>
+#include <vector>
 
 namespace libstark{
 namespace Protocols{
@@ -20,14 +29,16 @@ public:
     virtual ~partyState(){};
     std::vector<T_univariate> boundary;
     T_univariate boundaryPolysMatrix;
-    T_univariate ZK_mask_boundary;
     std::vector<T_univariate> ZK_mask_composition;
+
 };
 
 struct randomCoeefs{
+
     uint64_t degShift;
     std::vector<Algebra::FieldElement> coeffUnshifted;
     std::vector<Algebra::FieldElement> coeffShifted;
+
     //multiplyes the polynomial by the polynomial:
     // <coeffUnshifted> + <coeffShifted>*x^<degShift>
 
@@ -42,8 +53,9 @@ enum phase_t{START_PROTOCOL, UNIVARIATE_COMMITMENTS, VERIFIER_RANDOMNESS, RS_PRO
 
 phase_t advancePhase(const phase_t& currPhase);
 
-class verifierMsg : public TranscriptMessage{
+class verifierMsg : public TranscriptMessage {
 public:
+    std::string serialization() override;
     virtual ~verifierMsg(){};
     unsigned int numRepetitions;
     randomCoeffsSet_t randomCoefficients;

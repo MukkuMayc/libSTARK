@@ -86,8 +86,8 @@ public:
 
 private:
 
-    const static short numBits = 64;
-	FFF::Element element_; /**< @brief instance state */
+//    const static short numBits = 64;
+    FFF::Element element_; /**< @brief instance state */
 	
 };
 

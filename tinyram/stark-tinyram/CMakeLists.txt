@@ -31,6 +31,7 @@ target_include_directories(tinyram-lib PUBLIC src)
 set(LIBS ${LIBS} tinyram-lib)
 
 add_executable(${PROJECT_NAME}
+        ../../json.hpp
         src/main.cpp
 )
 

@@ -5,6 +5,8 @@
 #include "TinyRAMtoBair/ConstraintSystemToBair/cs2Bair.hpp"
 #include "TinyRAMtoBair/RamToContraintSystem/ALU.hpp"
 
+#include "../../json.hpp"
+
 using std::cout;
 using std::endl;
 using std::to_string;
@@ -82,6 +84,19 @@ void execute(const string assemblyCode, const unsigned int t, const unsigned int
 }
 
 int main(int argc, char *argv[]) {
+
+    nlohmann::json object =
+            {
+                    {"the good",  {
+                            {"dwad", "wdawd"},
+                            {"dwadawdwfwaf", "dwadawdwa"}
+                    }},
+                    {"the bad", "il cattivo"},
+                    {"the ugly", "il brutto"}
+            };
+    object["godfghfj"].push_back("sfdggfgdhjhkfg");
+    std::cout << object.dump() << std::endl;
+
     if(argc < 2){
         printHelp(argv[0]);
         return 0;

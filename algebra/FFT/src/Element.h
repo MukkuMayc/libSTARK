@@ -25,7 +25,7 @@ class Element {
 	//Attributes
 public:
 	static const unsigned int log_bits_in_byte = 3;
-	static const unsigned int bits_in_byte = 1<<log_bits_in_byte;
+//	static const unsigned int bits_in_byte = 1<<log_bits_in_byte;
 	static const unsigned int log_ord = 6;
 	static const unsigned int ord = 1<<log_ord;
 	static const unsigned int log_bits_in_cell =6;

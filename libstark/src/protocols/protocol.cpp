@@ -7,7 +7,7 @@
 #include "protocols/Ali/prover.hpp"
 #include "protocols/Ali/verifier.hpp"
 #include "reductions/BairToAcsp/BairToAcsp.hpp"
-
+#include "protocols/Ali/common_details/common.hpp"
 #include <iostream>
 // #include <thread>
 
@@ -51,6 +51,8 @@ void startVerification() { startColor(GREEN); }
 void startSpecs() { startColor(CYAN); }
 
 void startCicleCount() { startColor(WHITE); }
+
+
 
 std::string numBytesToString(uint64_t numBytes) {
     std::string suffix[] = {"Bytes",  "KBytes", "MBytes", "GBytes",
@@ -150,7 +152,8 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
 
             startVerifier();
             const auto vMsg = verifier.sendMessage();
-
+            auto vMsg_ptr = vMsg.get();
+            std::cout << static_cast<Ali::details::verifierMsg*>(vMsg_ptr)->serialization() << std::endl;
             verifierTime += t.getElapsed();
             t = Timer();
 
@@ -188,7 +191,6 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                queriedDataBytes);
     printSpecsCSV(proverTime, verifierTime, proofGeneratedBytes, proofSentBytes,
                   queriedDataBytes);
-
     return res;
 }
 

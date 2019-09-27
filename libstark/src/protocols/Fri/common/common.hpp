@@ -5,13 +5,17 @@
 #include "protocols/common/queries.hpp"
 
 #include <algebraLib/FieldElement.hpp>
-#include <vector>
 #include <map>
+#include "../../../../../libSTARK/json.hpp"
+#include "serialize_funfunc.hpp"
+
 
 namespace libstark{
 namespace Protocols{
 namespace Fri{
 namespace common{
+
+
 
 std::vector<Algebra::FieldElement> getL0Basis(const std::vector<Algebra::FieldElement>& L, const bool L0isMSB);
 std::vector<Algebra::FieldElement> getL1Basis(const std::vector<Algebra::FieldElement>& L, const bool L0isMSB);
@@ -26,6 +30,8 @@ namespace SoundnessParameters{
 template<typename T>
 class state_t{
 public:
+    std::string serialize();
+
     T localState;
     std::map<Algebra::FieldElement, state_t<T> , Algebra::classCompElements> subproofs;
 };
@@ -38,6 +44,7 @@ typedef std::vector<Algebra::FieldElement> subproofLocation_t;
 
 class verifierRequest_t : public TranscriptMessage{
     public:
+        std::string serialization() override;
         std::vector<subproofLocation_t> proofConstructionQueries;
         rawQueries_t dataQueries;
 };

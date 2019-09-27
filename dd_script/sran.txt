@@ -1,0 +1,57 @@
+virtual ~verifierMsg(){};
+    unsigned int numRepetitions;
+    randomCoeffsSet_t randomCoefficients;
+    std::vector<std::vector<Algebra::FieldElement>> coeffsPi;
+    std::vector<std::vector<Algebra::FieldElement>> coeffsChi;
+    Ali::details::rawQueries_t queries;
+    std::vector<std::unique_ptr<TranscriptMessage>> RS_verifier_witness_msg;
+    std::vector<std::unique_ptr<TranscriptMessage>> RS_verifier_composition_msg;
+
+
+
+
+struct:
+	unsigned int numRepetitions; (int)
+	randomCoeffsSet_t randomCoefficients;(set)
+		- boundary (vector<T_univariate>)
+		- boundaryPolyMatrix (T_unvariante)
+		- ZK_mask_boundary (T_univariate) --doesn't use
+    	- ZK_mask_composition (vector<T_univariate>)
+   		//T_univariate --шаблон = uniEvalView_t
+   		------------------------------------------------
+   			uniEvalView_t:
+				1. CryptoCommitment::SparceMerkleTree view;  (there are function to de/serialized to vector)
+				2. CryptoCommitment::hashDigest_t commitment; (char buffer[128/8])
+				3. expliciteQueries_t queries; (std::map<uint64_t , std::map<short, std::vector<setVal_t> > >)
+				//setVal_t = std::function<void(const Algebra::FieldElement&)> (const Algebra::FieldElement&)
+				//Algebra::FieldElement
+					class Element
+						cell_t c[element_len] (array of 1 element of long long unsigned int)
+				//setVal_t = long long unsigned int;
+	coeffsPi (std::vector<std::vector<Algebra::FieldElement>>);
+		//Algebra::FieldElement
+			class Element
+				cell_t c[element_len] (array of 1 element of long long unsigned int)
+		//FieldElements = long long unsigned int;
+	coeffsChi (std::vector<std::vector<Algebra::FieldElement>>);
+	queries (something like randomCoeffsSet_t but rawQuery_t)
+		//rawQuery_t std::set<unsigned long long>
+		queries == std::set<unsigned long long>
+    std::vector<std::unique_ptr<IOPP_verifierInterface>> RS_verifier_witness_;
+    	//IOPP_verifierInterface == queriesToInp_t == std::map<uint64_t,std::vector<Algebra::FieldElement*>>
+    std::vector<std::unique_ptr<IOPP_verifierInterface>> RS_verifier_composition_msg;
+    	//something like RS_verifier_witness_;
+
+
+
+
+
+
+
+
+
+
+
+
+
+};

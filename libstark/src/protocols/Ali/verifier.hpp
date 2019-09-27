@@ -39,6 +39,7 @@ class verifier_t : public verifierInterface{
     uint64_t expectedQueriedDataBytes()const;
     void fillResultsAndCommitmentRandomly();
 
+
     
     private:
     const BairInstance& bairInstance_;
@@ -64,7 +65,7 @@ class verifier_t : public verifierInterface{
     void generateRandomCoefficients(Ali::details::randomCoeffsSet_t& randCoeffs);
     void generateQueries(const RS_verifierFactory_t& RS_verifierFactory);
     
-    void keepZK_Witness_maskCommitment(const CryptoCommitment::hashDigest_t& commitment);
+//    void keepZK_Witness_maskCommitment(const CryptoCommitment::hashDigest_t& commitment);
     void keepZK_Composition_maskCommitment(const CryptoCommitment::hashDigest_t& commitment, const unsigned int maskIdx);
     void keepWitnessCommitment(const CryptoCommitment::hashDigest_t& commitment);
     
@@ -73,6 +74,15 @@ class verifier_t : public verifierInterface{
     void digestResults(const Ali::details::rawResults_t& rawResults);
     bool verifyComitment()const;
     void fetchResults()const;
+
+
+    std::string VecToStr(std::vector<Algebra::FieldElement> Vector);
+    std::string VecOfStrToStr(std::vector<std::string> Vector);
+    std::string CharArrToStr(char* ArrChar);
+    //this func make from set<uint> string with separate by ","
+    std::string SetToStr(std::set<uint64_t> Set);
+    std::string VecOfVecOfALFEToStr(std::vector<std::vector<uint64_t>> Vector);
+    std::string VecOfSetOfUintToStr(std::vector<std::set<uint64_t>> Vector);
 };
 
 

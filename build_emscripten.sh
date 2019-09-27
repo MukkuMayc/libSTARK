@@ -29,7 +29,7 @@ if [ -f "$input" ]; then
     threads_num="$line"
   done < "$input"
 else
-  threads_num=2
+  threads_num=12
 fi
 
 #compile

@@ -5,8 +5,15 @@
 #include "common/Utils/TaskReporting.hpp"
 #include "reductions/BairToAcsp/BairToAcsp.hpp"
 #include <algebraLib/PolynomialDegree.hpp>
-
+#include "../Fri/common/common.hpp"
 #include <string>
+#include <algorithm>
+#include <sstream>
+#include <iterator>
+#include <iostream>
+#include <vector>
+// #include "../serialization_func.h"
+
 
 namespace libstark{
 namespace Protocols{
@@ -31,11 +38,11 @@ vector<FieldElement> getRandVector(const unsigned int len){
     return res;
 }
 
-verifier_t::verifier_t(const BairInstance& bairInstance, const RS_verifierFactory_t& RS_verifierFactory, const unsigned short securityParameter) : 
+verifier_t::verifier_t(const BairInstance& bairInstance, const RS_verifierFactory_t& RS_verifierFactory, const unsigned short securityParameter) :
     bairInstance_(bairInstance),
     phase_(Ali::details::phase_t::START_PROTOCOL)
     {
-    
+
     TASK("Constructing verifier");
 
     //Soundness per random linear combination
@@ -94,46 +101,46 @@ void verifier_t::receiveMessage(const TranscriptMessage& msg){
     const Ali::details::proverMsg& pMsg = dynamic_cast<const Ali::details::proverMsg&>(msg);
 
     switch(phase_){
-    
+
     case(Ali::details::phase_t::UNIVARIATE_COMMITMENTS):
     {
         TASK("Received commitments");
-        
+
         keepWitnessCommitment(pMsg.commitments[0]);
         for(unsigned int i=1; i< pMsg.commitments.size(); i++){
             keepZK_Composition_maskCommitment(pMsg.commitments[i],i-1);
         }
-       
+
         phase_ = Ali::details::advancePhase(phase_);
     }
     break;
-    
+
     case(Ali::details::phase_t::RS_PROXIMITY):
     {
         TASK("Received message for RS proximity prover");
-        
+
         bool RS_Done = true;
-        
+
         for(unsigned int i=0; i<RS_verifier_witness_.size(); i++){
             if(!RS_verifier_witness_[i]->doneInteracting()){
                 RS_verifier_witness_[i]->receiveMessage(*pMsg.RS_prover_witness_msg[i]);
                 RS_Done = false;
             }
         }
-        
+
         for(unsigned int i=0; i<RS_verifier_composition_.size(); i++){
             if(!RS_verifier_composition_[i]->doneInteracting()){
                 RS_verifier_composition_[i]->receiveMessage(*pMsg.RS_prover_composition_msg[i]);
                 RS_Done = false;
             }
         }
-        
+
         if(RS_Done){
             phase_ = Ali::details::advancePhase(phase_);
         }
     }
     break;
-    
+
     case(Ali::details::phase_t::RESULTS):
     {
         TASK("Received results");
@@ -142,7 +149,7 @@ void verifier_t::receiveMessage(const TranscriptMessage& msg){
         phase_ = Ali::details::advancePhase(phase_);
     }
     break;
-    
+
     default:
         _COMMON_FATAL("Got into unexpected phase in the protocol");
     }
@@ -152,7 +159,7 @@ msg_ptr_t verifier_t::sendMessage(){
     msg_ptr_t vMsgPtr(new Ali::details::verifierMsg());
     auto& vMsg = dynamic_cast<Ali::details::verifierMsg&>(*vMsgPtr);
     switch(phase_){
-    
+
     case(Ali::details::phase_t::START_PROTOCOL):
     {
         TASK("Sending start protocol request)");
@@ -160,7 +167,7 @@ msg_ptr_t verifier_t::sendMessage(){
         phase_ = Ali::details::advancePhase(phase_);
     }
     break;
-    
+
     case(Ali::details::phase_t::VERIFIER_RANDOMNESS):
     {
         TASK("Sending random coefficients for unified RS proximity proof (including ZK rho)");
@@ -169,29 +176,29 @@ msg_ptr_t verifier_t::sendMessage(){
         vMsg.randomCoefficients = randCoeffs_;
         phase_ = Ali::details::advancePhase(phase_);
     }
-    
+
     case(Ali::details::phase_t::RS_PROXIMITY):
     {
             TASK("Sending message from RS proximity verifier");
             for(auto& v : RS_verifier_witness_){
                 vMsg.RS_verifier_witness_msg.push_back(v->sendMessage());
             }
-            
+
             for(auto& v : RS_verifier_composition_){
                 vMsg.RS_verifier_composition_msg.push_back(v->sendMessage());
             }
     }
     break;
-    
+
     case(Ali::details::phase_t::QUERY):
     {
-        
+
         TASK("Sending queries");
         vMsg.queries = getRawQueries();
         phase_ = Ali::details::advancePhase(phase_);
     }
     break;
-    
+
     default:
         _COMMON_FATAL("Got into unexpected phase in the protocol");
     }
@@ -205,13 +212,13 @@ void verifier_t::digestQueries(const vector<const queriesToInp_t*>& queriesToInp
     const auto basisPCPP(Ali::details::PCP_common::basisForWitness(*(instance_[0])));
     const uint64_t numWitnesses = instance_[0]->witnessDegreeBound().size();
     const uint64_t numWitnessColumns = Infrastructure::POW2(Ali::details::PCP_common::boundaryPolysMatrix_logWidth(*(instance_[0]), combSoundness_.size()));
-    
+
     //
     // Digest queries made to univariate of Witness PCPP
     //
     {
         TASK("Digest queries to Witness (aka boundary) RS PCPP univariate");
-      
+
         //calculate total number of queries
         {
             unsigned int numLinearCombinations = 0;
@@ -263,13 +270,13 @@ void verifier_t::digestQueries(const vector<const queriesToInp_t*>& queriesToInp
         }
     }
 
-    
+
     //
     // Digest queries made to univariate of Composition PCPP
     //
     {
         TASK("Digest queries to Composition RS PCPP univariate");
-       
+
         const auto consistencySpace(Ali::details::PCP_common::basisForConsistency(*(instance_[0])));
 
         //calculate total number of queries
@@ -281,7 +288,7 @@ void verifier_t::digestQueries(const vector<const queriesToInp_t*>& queriesToInp
             polyEvaluation_composition_.resize(numLinearCombinations);
         }
         uint64_t currCombIdx = 0;
-        
+
         for(unsigned int ldeCombinationId =0; ldeCombinationId< queriesToInput_composition.size(); ldeCombinationId++){
             for(const auto& q : *(queriesToInput_composition[ldeCombinationId])){
                 const uint64_t x = q.first;
@@ -316,7 +323,7 @@ void verifier_t::digestQueries(const vector<const queriesToInp_t*>& queriesToInp
                             for (unsigned int affine_num = 0; affine_num < nsize; affine_num++){
                                 const FieldElement currNeighborVal = neighbours[affine_num]->eval(alpha);
 
-                                { 
+                                {
                                     const uint64_t neighborValIndex = mapFieldElementToInteger(0,basisPCPP.basis.size(), currNeighborVal + basisPCPP.shift);//getSpaceIndexOfElement(basisPCPP.basis,basisPCPP.shift,currNeighborVal);
                                     const uint64_t x_matrix = (neighborValIndex*numWitnessColumns) + wIndex;
                                     const uint64_t blockIndex_matrix = CryptoCommitment::getBlockIndex(x_matrix);
@@ -336,38 +343,38 @@ void verifier_t::digestQueries(const vector<const queriesToInp_t*>& queriesToInp
 
 rawQueries_t verifier_t::getRawQueries()const{
     TASK("Verifier generates raw queries to be passed to prover");
-    
+
     rawQueries_t res;
-    
-    //ZK Composition mask 
+
+    //ZK Composition mask
     {
         TASK("ZK Composition Mask polynomial");
         for (const auto& v : state_.ZK_mask_composition){
             res.ZK_mask_composition.push_back(v.getRawQuery());
         }
     }
-    
-    //boundry 
+
+    //boundry
     {
         TASK("Boundary polynomials");
         res.boundaryPolysMatrix = state_.boundaryPolysMatrix.getRawQuery();
     }
-    
+
     return res;
 }
 
 void verifier_t::digestResults(const rawResults_t& rawResults){
     TASK("Verifier digests results");
-   
-    //ZK Composition mask 
+
+    //ZK Composition mask
     {
         TASK("ZK Composition Mask polynomial");
         for(unsigned int i=0; i< state_.ZK_mask_composition.size(); i++){
             state_.ZK_mask_composition[i].digestResults(rawResults.ZK_mask_composition[i]);
         }
     }
-    
-    //boundary 
+
+    //boundary
     {
         TASK("Boundary polynomials");
         state_.boundaryPolysMatrix.digestResults(rawResults.boundaryPolysMatrix);
@@ -377,7 +384,7 @@ void verifier_t::digestResults(const rawResults_t& rawResults){
 bool verifier_t::verifyComitment()const{
     TASK("Verifying integrity of results with commitments");
     bool res = true;
-    
+
     //ZK Composition mask
     {
         TASK("ZK Composition Mask polynomial");
@@ -385,7 +392,7 @@ bool verifier_t::verifyComitment()const{
             res &= v.verifyComitment();
         }
     }
-    
+
     //boundary
     {
         TASK("Boundary polynomials");
@@ -398,7 +405,7 @@ bool verifier_t::verifyComitment()const{
 
 void verifier_t::fetchResults()const{
     TASK("Verifier fetches results");
-    
+
     //ZK Composition mask
     {
         TASK("ZK Composition Mask polynomial");
@@ -406,7 +413,7 @@ void verifier_t::fetchResults()const{
             v.fetchResults();
         }
     }
-   
+
     //boundary
     {
         TASK("Boundary polynomials");
@@ -435,18 +442,18 @@ void verifier_t::fetchResults()const{
 }
 
 void verifier_t::fillResultsAndCommitmentRandomly(){
-    
+
     //random results for local proofs
     for(auto& v : state_.ZK_mask_composition){
         v.fillResultsAndCommitmentRandomly();
     }
-    
+
     state_.boundaryPolysMatrix.fillResultsAndCommitmentRandomly();
-    
+
     for(auto& v : RS_verifier_composition_){
         v->fillResultsAndCommitmentRandomly();
     }
-    
+
     for(auto& v : RS_verifier_witness_){
         v->fillResultsAndCommitmentRandomly();
     }
@@ -459,7 +466,7 @@ void verifier_t::verifyParams(const AcspInstance& instance){
     const short PCPP_spaceDim = Ali::details::PCP_common::basisForWitness(instance).basis.size();
     const short ContextField_Dim = Algebra::ExtensionDegree;
     _COMMON_ASSERT((PCPP_spaceDim <= ContextField_Dim),
-            std::string("Can't construct a PCP proof for Acsp instance, because the context field is too small\n") + 
+            std::string("Can't construct a PCP proof for Acsp instance, because the context field is too small\n") +
             std::string("The context field is of dimension ") + std::to_string(ContextField_Dim) + std::string("\n") +
             std::string("The sub-space for PCPP proof must be at least of dimension ") + std::to_string(PCPP_spaceDim)
             );
@@ -489,7 +496,7 @@ void verifier_t::generateQueries(const RS_verifierFactory_t& RS_verifierFactory)
             }
         }
     }
-    
+
     {
         TASK("RS proximity of composition");
         const auto PCPP_Basis(Ali::details::PCP_common::basisForConsistency(*(instance_[0])));
@@ -556,14 +563,14 @@ void verifier_t::generateRandomCoefficients(Ali::details::randomCoeffsSet_t& ran
 
 bool verifier_t::verify()const{
     bool res = verifyComitment();
-    
+
     {
         TASK("Calling Witness RS Proximity verifier");
         for (const auto& v : RS_verifier_witness_){
             res &= v->verify();
         }
     }
-    
+
     {
         TASK("Calling Composition RS Proximity verifier");
         for (const auto& v : RS_verifier_composition_){
@@ -582,24 +589,24 @@ uint64_t verifier_t::expectedCommitedProofBytes()const{
     const uint64_t basisPCPP_size = Ali::details::PCP_common::basisForWitness(*(instance_[0])).basis.size();
     const uint64_t evaluationBytes = Infrastructure::POW2(basisPCPP_size) * sizeof(FieldElement);
     const uint64_t evaluationWithCommitmentBytes = 2UL * evaluationBytes;
-    
-    // *2 for merkle 
+
+    // *2 for merkle
     const uint64_t witnessMatrixSize = 2UL*Infrastructure::POW2(Ali::details::PCP_common::boundaryPolysMatrix_logNumElements(*(instance_[0]), combSoundness_.size())) * sizeof(FieldElement);
-    
+
     //Witness matrix + witness ZK mask
     const uint64_t localProofsBytes = evaluationWithCommitmentBytes + witnessMatrixSize;
     uint64_t RS_proximityProofBytes_witness = 0;
     for (const auto& v : RS_verifier_witness_){
         RS_proximityProofBytes_witness += v->expectedCommitedProofBytes();
     }
-    
+
     uint64_t RS_proximityProofBytes_composition = 0;
     for (const auto& v : RS_verifier_composition_){
         RS_proximityProofBytes_composition += v->expectedCommitedProofBytes();
     }
-    
+
     const uint64_t evaluationWithCommitmentBytes_composition = 2UL * evaluationBytes;
-    
+
     const uint64_t localProofsBytes_composition = evaluationWithCommitmentBytes_composition * 2UL; //1 for composition and 1 for ZK mask
 
     return localProofsBytes + localProofsBytes_composition + RS_proximityProofBytes_witness + RS_proximityProofBytes_composition;
@@ -622,12 +629,12 @@ uint64_t verifier_t::expectedSentProofBytes()const{
     for(const auto& v : RS_verifier_witness_){
         RS_proximityBytes_witness += v->expectedSentProofBytes();
     }
-    
+
     uint64_t RS_proximityBytes_composition = 0;
     for(const auto& v : RS_verifier_composition_){
         RS_proximityBytes_composition += v->expectedSentProofBytes();
     }
-    
+
     return localBytes + RS_proximityBytes_witness + RS_proximityBytes_composition;
 }
 
@@ -641,22 +648,144 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
         }
         numExpectedHashes += state_.boundaryPolysMatrix.expectedQueriedFieldElementsNum();
     }
-    
+
     const uint64_t localBytes = numExpectedHashes * sizeof(FieldElement);
     uint64_t RS_proximityBytes_witness =0;
     for(const auto& v : RS_verifier_witness_){
         RS_proximityBytes_witness += v->expectedQueriedDataBytes();
     }
-    
+
     uint64_t RS_proximityBytes_composition =0;
     for(const auto& v : RS_verifier_composition_){
         RS_proximityBytes_composition += v->expectedQueriedDataBytes();
     }
-    
+
     return localBytes + RS_proximityBytes_witness + RS_proximityBytes_composition;
 }
-
 } // namespace Verifier
+
+    std::string VecToStr(std::vector<Algebra::FieldElement> Vector) {
+        std::ostringstream oss;
+
+        if (!Vector.empty())
+        {
+            // Convert all but the last element to avoid a trailing ","
+            std::copy(Vector.begin(), Vector.end()-1,
+                      std::ostream_iterator<Algebra::FieldElement>(oss, ","));
+
+            // Now add the last element with no delimiter
+            oss << Vector.back();
+        }
+        return oss.str();
+    }
+    std::string VecOfVecOfALFEToStr(std::vector<std::vector<Algebra::FieldElement>> Vector) {
+        std::string Str = "";
+        for (int i=0; i<Vector.size(); i++) {
+            Str+= VecToStr(Vector[i]);
+        }
+        return Str;
+    }
+    std::string SetToStr(std::set<unsigned long long> Set) {
+        std::ostringstream stream;
+        std::copy(Set.begin(), Set.end(), std::ostream_iterator<unsigned long long>(stream, ","));
+        return stream.str();
+    }
+    std::string VecOfSetOfUintToStr(std::vector<std::set<unsigned long long>> Vector) {
+        std::string Str = "";
+        for (int i=0; i<Vector.size(); i++) {
+            Str+= SetToStr(Vector[i]);
+        }
+        return Str;
+
+    }
+    std::string boundeg (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
+        std::string Str="";
+        for (int i=0; i<RandomCo.boundary.size();i++) {
+            Str += std::to_string(RandomCo.boundary[i].degShift);
+        }
+        return Str;
+    }
+    std::string bounUncoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo){
+        std::string Str="";
+        for (int i=0; i<RandomCo.boundary.size();i++) {
+            Str+= VecToStr(RandomCo.boundary[i].coeffUnshifted);
+        }
+        return Str;
+    }
+    std::string bouncoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
+        std::string Str="";
+        for (int i=0; i<RandomCo.boundary.size();i++) {
+            Str+= VecToStr(RandomCo.boundary[i].coeffShifted);
+        }
+        return Str;
+    }
+//ZK_mask....
+    std::string ZKdeg (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
+        std::string Str="";
+        for (int i=0; i<RandomCo.ZK_mask_composition.size();i++) {
+            Str += std::to_string(RandomCo.ZK_mask_composition[i].degShift);
+        }
+        return Str;
+    }
+    std::string ZKUncoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo){
+        std::string Str="";
+        for (int i=0; i<RandomCo.ZK_mask_composition.size();i++) {
+            Str+= VecToStr(RandomCo.ZK_mask_composition[i].coeffUnshifted);
+        }
+        return Str;
+    }
+    std::string Zkcoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
+        std::string Str="";
+        for (int i=0; i<RandomCo.ZK_mask_composition.size();i++) {
+            Str+= VecToStr(RandomCo.ZK_mask_composition[i].coeffShifted);
+        }
+        return Str;
+    }
+ //JSON Serialization
+    std::string libstark::Protocols::Ali::details::verifierMsg::serialization()  {
+    nlohmann::json result = {
+                {"numRepetitions", std::to_string(numRepetitions)},
+                {"randomCoefficients",  {
+                                                {"boundary", {
+                                                                     {"degShift", boundeg(randomCoefficients)},
+                                                                     {"coeffUnshifted", bounUncoeff(randomCoefficients)},
+                                                                     {"coeffShifted", bouncoeff(randomCoefficients)}
+                                                }},
+                                                {"boundaryPolyMatrix", {
+                                                                     {"degShift", std::to_string(randomCoefficients.boundaryPolysMatrix.degShift)},
+                                                                     {"coeffUnshifted", VecToStr(randomCoefficients.boundaryPolysMatrix.coeffUnshifted)},
+                                                                     {"coeffShifted", VecToStr(randomCoefficients.boundaryPolysMatrix.coeffShifted)}
+                                                }},
+                                                {"ZK_mask_composition", {
+                                                                      {"degShift", ZKdeg(randomCoefficients)},
+                                                                      {"coeffUnshifted", ZKUncoeff(randomCoefficients)},
+                                                                      {"coeffShifted", Zkcoeff(randomCoefficients)}
+                                                }}
+                }},
+                {"coeffsPi", VecOfVecOfALFEToStr(coeffsPi)},
+                {"coeffsChi", VecOfVecOfALFEToStr(coeffsChi)},
+                {"queries", {
+                                                {"boundary", VecOfSetOfUintToStr(queries.boundary)},
+                                                {"boundaryPolyMatrix", SetToStr(queries.boundaryPolysMatrix)},
+                                                {"ZK_mask_composition", VecOfSetOfUintToStr(queries.ZK_mask_composition)}
+                }}
+    };
+
+
+//                std::for_each(RS_verifier_witness_msg.begin(), RS_verifier_witness_msg.end(), [&](std::unique_ptr<TranscriptMessage>& element){
+//                    result["RS_verifier_witness_msg"].push_back(element.get()->serialization());
+//
+//                });
+
+
+
+//                std::for_each(RS_verifier_composition_msg.begin(), RS_verifier_composition_msg.end(), [&result](std::unique_ptr<TranscriptMessage> &&element){
+//                    result["RS_verifier_composition_msg"].push_back(element.get()->serialization()); });
+
+
+    return result.dump();
+    }
+
 } // namespace Ali
-} // namespace Protocols
+} // namespace Protocolsс
 } // namespace libstark

@@ -1,0 +1,39 @@
+Intern:
+	Understanding object oriented programming methodology
+	Knowledge of basic algorithms (search, sorting)
+
+Junior:
+	C++ Core(I: Interfaces, F: Functions, C: Classes and class hierarchies, Enum: Enumerations, ES: Expressions and statements, CP: Concurrency and parallelism, E: Error handling, Con: Constants and immutability, T: Templates and generic programming, CPL: C-style programming, SF: Source files, SL: The Standard Library);
+	Ability to compile make cmake files
+Junior+:
+	C++ Core;
+	ASM(TinyRAM) Core;
+	Ability to compile make cmake files
+Middle:
+	C++ Core;
+	Ability to compile make cmake files
+	ASM(TinyRAM) Core;
+	Basic knowledge of ZK technology; 
+	WEB development ( Javascript + HTML Core);
+Middle+:
+	C++ Core;
+	Ability to compile make cmake files
+	Ability to compile with emscripten
+	ASM(TinyRAM) + WASM Core;
+	Deep knowledge of ZK technology + basic knowledge of ZKSTARK's;
+	WEB Development ( Javascript + HTML Core);
+	Basic knowledge of encryption's algorithm
+	Basic knowledge of Algebra;
+	SQl, noSQL skills
+Senior:
+	C++ Core + performance frameworks;
+	Ability to compile make cmake files
+	Ability to compile with emscripten
+	ASM(TinyRAM) + WASM Core;
+	Deep knowledge of ZK technology + basic knowledge of ZKSTARK's;
+	WEB Development ( Javascript + HTML + CSS Core);
+	Deep knowledge of encryption's algorithm
+	Algebra for finite fields, Galois fields;
+	SQl, noSQL skills
+
+	

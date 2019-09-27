@@ -24,6 +24,7 @@ namespace Protocols{
 class TranscriptMessage{
 public:
 virtual ~TranscriptMessage(){};
+virtual std::string serialization() {};
 };
 
 typedef std::unique_ptr<TranscriptMessage> msg_ptr_t;

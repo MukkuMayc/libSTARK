@@ -1,8 +1,9 @@
 import pprint
 import pandas as pd
+import pymongo
 
 def getData(i): 
-    import pymongo
+    
     #connect to db
     client = pymongo.MongoClient('mongodb://localhost:27017/')
 
@@ -33,7 +34,7 @@ def getData(i):
     return(fromID, toID, fromCash, toCash, value, cashID)
     
 def updateDB(fromCash, toCash, fromID, toID, cashID):
-    import pymongo
+    
     client = pymongo.MongoClient('mongodb://localhost:27017/')
     with client:
         db = client.testdb
@@ -45,7 +46,7 @@ def updateDB(fromCash, toCash, fromID, toID, cashID):
     # pprint.pprint(list(db.users.find()))
 
 def getQuantityTransaction():
-    import pymongo
+    
     client = pymongo.MongoClient('mongodb://localhost:27017/')
     with client:
         db = client.testdb
@@ -53,7 +54,7 @@ def getQuantityTransaction():
     return (quantity)
 
 def addBackupData():
-     import pymongo
+     
      client = pymongo.MongoClient('mongodb://localhost:27017/')
      with client:
         db = client.testdb
@@ -75,7 +76,7 @@ def addBackupData():
     #     db.usersBackup.insert_many(users)
 
 def callBackup():
-    import pymongo
+    
     client = pymongo.MongoClient('mongodb://localhost:27017/')
      # client = pymongo.MongoClient('mongodb://localhost:27017/')
     with client:
@@ -87,14 +88,14 @@ def callBackup():
         db.usersBackup.drop()
 
 def deleteBackupData():
-    import pymongo
+    
     client = pymongo.MongoClient('mongodb://localhost:27017/')
     with client:
         db = client.testdb
         db.usersBackup.drop()
     
 def printDB():
-    import pymongo
+    
     client = pymongo.MongoClient('mongodb://localhost:27017/')
     with client:
         db = client.testdb
@@ -105,7 +106,7 @@ def printDB():
         print("----------------------------")
 
 def cleanUpForTesting():
-    import pymongo
+    
     client = pymongo.MongoClient('mongodb://localhost:27017/')
      #add test data
     users = [

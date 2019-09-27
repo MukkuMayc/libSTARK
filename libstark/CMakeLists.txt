@@ -47,7 +47,8 @@ add_library(${PROJECT_NAME}
         src/reductions/BairToAcsp/Routing/SymmetricDeBruijnNetwork.cpp
         src/reductions/BairToAcsp/Routing/TandemNetwork.cpp
         src/reductions/BairToAcsp/BairToAcsp.cpp
-)
+        src/protocols/Fri/common/serialize_funfunc.cpp
+        src/protocols/Fri/common/serialize_funfunc.hpp)
 
 file(READ ../compile_flags.txt COMPILE_FLAGS)
 file(READ ../link_flags.txt    LINK_FLAGS)
