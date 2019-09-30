@@ -675,6 +675,7 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
 
             // Now add the last element with no delimiter
             oss << Vector.back().asString();
+            oss.str().pop_back();
 
         }
         oss << "]";
@@ -697,6 +698,7 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
         stream << "[";
         if (!Set.empty()) {
             std::copy(Set.begin(), Set.end(), std::ostream_iterator<unsigned long long>(stream, ","));
+            stream.str().pop_back();
         }
         stream << "]";
         return stream.str();
