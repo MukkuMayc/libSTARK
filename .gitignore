@@ -11,3 +11,4 @@ threads_num.txt
 **/condoub.txt
 dd_script/test.asm
 *.pyc
+_build
