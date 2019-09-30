@@ -1,6 +1,7 @@
 #include "common.hpp"
 #include <algebraLib/SubspacePolynomial.hpp>
 #include "serialize_funfunc.hpp"
+#include "../../Ali/common_details/serialization_fun.h"
 namespace libstark{
 namespace Protocols{
 namespace Fri{
@@ -76,10 +77,6 @@ vector<FieldElement> getColumnBasis(const vector<FieldElement>& L, const bool L0
     };
     return result;
 };
-
-
-
-
 
 
 unsigned short dimOfColumn(const unsigned short dimOfL){

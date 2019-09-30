@@ -4,6 +4,7 @@
 #include "common/Utils/TaskReporting.hpp"
 #include "protocols/Fri/prover.hpp"
 #include "reductions/BairToAcsp/BairToAcsp.hpp"
+#include "common_details/serialization_fun.h"
 
 #include <set>
 // #if __GNUG__
@@ -927,6 +928,21 @@ vector<FieldElement> prover_t::computeUnivariateForRS_Proximity_Composition(cons
 Ali::details::rawResults_t prover_t::answerQueries(const Ali::details::rawQueries_t& queries){
     return fillResults(state_, *fftInstance_, *(instance_[0]), queries, entireWitnessKept_, numRS_repetitions_);
 }
+
+//        std::string libstark::Protocols::Ali::details::proverMsg::serialization()  {
+//            nlohmann::json result = {
+//                    {"commitments", commitmentsToStr(details::proverMsg::commitments)},
+//                    {"results", {
+//                                        {"boundary", results_boundaryToStr(Ali::details::proverMsg::results.boundary)},
+//                                        {"boundaryPolysMatrix", results_boundaryPolToStr(Ali::details::proverMsg::results.boundaryPolysMatrix)},
+//                                        {"ZK_mask_composition", results_ZKMToStr(Ali::details::proverMsg::results.ZK_mask_composition)}
+//                    },
+//
+//                    }}
+//
+//
+//            return result.dump();
+//        }
 
 
 } // namespace Prover

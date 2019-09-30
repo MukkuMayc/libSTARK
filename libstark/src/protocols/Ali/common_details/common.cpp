@@ -122,6 +122,20 @@ unsigned short boundaryPolysMatrix_logNumElements(const AcspInstance& src, const
     return witnessSpaceDim + logNumWitnesses;
 }
 
+
+//JSON Serialization
+//    std::string libstark::Protocols::Ali::details::proverMsg::serialization() {
+//        nlohmann::json result = {
+//                {"commitments",commitmentsToStr(commitments)},
+//                {"results",resultsToStr(results)},
+//                {"RS_prover_witness_msg",RS_prover_witness_msgToStr(RS_prover_witness_msg)},
+//                {"RS_prover_composition_msg",RS_prover_composition_msgToStr(RS_prover_composition_msg)}
+//
+//
+//                return result.dump();
+//        }
+//    };
+
 } //namespace PCP_common
 
 } // namespace details

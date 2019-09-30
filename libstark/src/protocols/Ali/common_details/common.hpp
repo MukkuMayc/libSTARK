@@ -9,7 +9,7 @@
 #include <algebraLib/PolynomialDegree.hpp>
 #include <vector>
 #include "../../json.hpp"
-
+#include "serialization_fun.h"
 
 #include <string>
 #include <algorithm>
@@ -73,6 +73,7 @@ public:
     Ali::details::rawResults_t results;
     std::vector<std::unique_ptr<TranscriptMessage>> RS_prover_witness_msg;
     std::vector<std::unique_ptr<TranscriptMessage>> RS_prover_composition_msg;
+//    std::string serialization() override;
 };
 
 namespace PCP_common {
