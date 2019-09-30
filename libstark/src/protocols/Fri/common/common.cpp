@@ -53,36 +53,36 @@ vector<FieldElement> getColumnBasis(const vector<FieldElement>& L, const bool L0
 
     return basisForColumn;
 }
-    template<typename T>
-    std::string state_t<T>::serialize() {
-    nlohmann::json data = {
-            {"localState", ddSetToStr(localState)}
-    };
-    std::for_each(subproofs.begin(), subproofs.end(), [&data] (std::pair<const Algebra::FieldElement, libstark::Protocols::Fri::common::state_t<rawQuery_t>> &element) {
-    nlohmann::json tmp{
-            {"first", element.first.asString()},
-            {"second", element.second.serialize()}
-    };
+//    template<typename T>
+//    std::string state_t<T>::serialize() {
+//    nlohmann::json data = {
+//            {"localState", ddSetToStr(localState)}
+//    };
+//    std::for_each(subproofs.begin(), subproofs.end(), [&data] (std::pair<const Algebra::FieldElement, libstark::Protocols::Fri::common::state_t<rawQuery_t>> &element) {
+//    nlohmann::json tmp{
+//            {"first", element.first.asString()},
+//            {"second", element.second.serialize()}
+//    };
+//
+//    data["subproofs"].push_back(tmp.dump());
+//});
+//    return data.dump();
+//};
 
-    data["subproofs"].push_back(tmp.dump());
-});
-    return data.dump();
-};
-
-
-    std::string verifierRequest_t::serialization() {
-    nlohmann::json result = {
-            {"proofConstructionQueries", ddVecOfVecOfALFEToStr(proofConstructionQueries)},
-            {"dataQueries", dataQueries.serialize()}
-    };
-};
-
-    std::string proverResponce_t::serialization() {
-        nlohmann::json result = {
-                {"proofConstructionQueries", VecOfBufferToStr(proofConstructionComitments)},
-                {"dataQueries", dataResults.serialize()}
-        };
-    }
+//
+//    std::string verifierRequest_t::serialization() {
+//    nlohmann::json result = {
+//            {"proofConstructionQueries", ddVecOfVecOfALFEToStr(proofConstructionQueries)},
+//            {"dataQueries", dataQueries.serialize()}
+//    };
+//};
+//
+//    std::string proverResponce_t::serialization() {
+//        nlohmann::json result = {
+//                {"proofConstructionQueries", VecOfBufferToStr(proofConstructionComitments)},
+//                {"dataQueries", dataResults.serialize()}
+//        };
+//    }
 
 
 

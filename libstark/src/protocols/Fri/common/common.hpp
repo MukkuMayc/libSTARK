@@ -44,14 +44,14 @@ typedef std::vector<Algebra::FieldElement> subproofLocation_t;
 
 class verifierRequest_t : public TranscriptMessage{
     public:
-        std::string serialization() override;
+//        std::string serialization() override;
         std::vector<subproofLocation_t> proofConstructionQueries;
         rawQueries_t dataQueries;
 };
 
 class proverResponce_t : public TranscriptMessage{
     public:
-        std::string serialization() override;
+//        std::string serialization() override;
         std::vector<CryptoCommitment::hashDigest_t> proofConstructionComitments;
         rawResults_t dataResults;
 };
