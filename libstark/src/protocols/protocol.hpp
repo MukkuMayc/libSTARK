@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include "../../../../../libSTARK/json.hpp"
 
 namespace libstark{
 namespace Protocols{
@@ -25,6 +26,7 @@ class TranscriptMessage{
 public:
 virtual ~TranscriptMessage(){};
 virtual std::string serialization() {};
+virtual nlohmann::json serialization1() {};
 };
 
 typedef std::unique_ptr<TranscriptMessage> msg_ptr_t;

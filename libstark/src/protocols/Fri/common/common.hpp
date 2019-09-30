@@ -30,7 +30,7 @@ namespace SoundnessParameters{
 template<typename T>
 class state_t{
 public:
-    std::string serialize();
+    nlohmann::json serialize();
 
     T localState;
     std::map<Algebra::FieldElement, state_t<T> , Algebra::classCompElements> subproofs;
@@ -44,7 +44,7 @@ typedef std::vector<Algebra::FieldElement> subproofLocation_t;
 
 class verifierRequest_t : public TranscriptMessage{
     public:
-        std::string serialization() override;
+        nlohmann::json serialization1() override;
         std::vector<subproofLocation_t> proofConstructionQueries;
         rawQueries_t dataQueries;
 };

@@ -3,7 +3,9 @@
 #include<iterator>
 #include <sstream>
 #include <algebraLib/FieldElement.hpp>
+#include "algorithm"
+#include "../../json.hpp"
 
-std::string ddVecOfVecOfALFEToStr(std::vector<std::vector<Algebra::FieldElement>> Vector);
-std::string ddVecToStr(std::vector<Algebra::FieldElement> Vector);
-std::string ddSetToStr(std::set<unsigned long long> Set);
+nlohmann::json ddVecOfVecOfALFEToStr(std::vector<std::vector<Algebra::FieldElement>> Vector);
+nlohmann::json ddVecToStr(std::vector<Algebra::FieldElement> Vector);
+nlohmann::json ddSetToStr(std::set<unsigned long long> Set);

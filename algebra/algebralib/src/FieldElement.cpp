@@ -24,7 +24,7 @@ namespace Algebra {
         bool first = true;
         while(elem != 0){
             if(!first){
-                s<<" ";
+                s<<",";
             }
             s<<(elem & 1);
             elem>>=1;
@@ -34,7 +34,7 @@ namespace Algebra {
         s <<"]";
 		return s.str();
 	}
-	
+
 
 elementsSet_t getStandartBasis(const unsigned short basisSize){
     elementsSet_t basis;

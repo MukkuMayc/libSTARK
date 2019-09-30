@@ -1,30 +1,35 @@
 #include "serialize_funfunc.hpp"
 
 
+nlohmann::json  ddSetToStr(std::set<unsigned long long> Set) {
+    nlohmann::json Str = nlohmann::json::array();
+    if (!Set.empty()) {
+        std::for_each(Set.begin(), Set.end(), [&Str] (const unsigned long long &x) {
 
-std::string ddSetToStr(std::set<unsigned long long> Set) {
-    std::ostringstream stream;
-    std::copy(Set.begin(), Set.end(), std::ostream_iterator<unsigned long long>(stream, ","));
-    return stream.str();
-}
-std::string ddVecToStr(std::vector<Algebra::FieldElement> Vector) {
-    std::ostringstream oss;
-
-    if (!Vector.empty())
-    {
-        // Convert all but the last element to avoid a trailing ","
-        std::copy(Vector.begin(), Vector.end()-1,
-                  std::ostream_iterator<Algebra::FieldElement>(oss, ","));
-
-        // Now add the last element with no delimiter
-        oss << Vector.back().asString();
+            Str.push_back(std::to_string(x));
+        });
     }
-    return oss.str();
+    return Str;
 }
-std::string ddVecOfVecOfALFEToStr(std::vector<std::vector<Algebra::FieldElement>> Vector) {
-    std::string Str = "";
-    for (int i=0; i<Vector.size(); i++) {
-        Str+= ddVecToStr(Vector[i]);
+
+nlohmann::json ddVecToStr(std::vector<Algebra::FieldElement> Vector) {
+
+    nlohmann::json Str = nlohmann::json::array();
+//        std::string Str = "[";
+    if (!Vector.empty()) {
+        for (int i = 0; i < Vector.size(); i++) {
+            Str.push_back(nlohmann::json::parse(Vector[i].asString()));
+        }
+    }
+//        Str += "]";
+    return Str;
+}
+nlohmann::json ddVecOfVecOfALFEToStr(std::vector<std::vector<Algebra::FieldElement>> Vector) {
+    nlohmann::json Str = nlohmann::json::array();
+    if (!Vector.empty()) {
+        for (int i = 0; i < Vector.size(); i++) {
+            Str.push_back(ddVecToStr(Vector[i]));
+        };
     }
     return Str;
 }
