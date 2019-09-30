@@ -59,7 +59,7 @@ vector<FieldElement> getColumnBasis(const vector<FieldElement>& L, const bool L0
     };
     std::for_each(subproofs.begin(), subproofs.end(), [&data] (std::pair<const Algebra::FieldElement, libstark::Protocols::Fri::common::state_t<rawQuery_t>> &element) {
     nlohmann::json tmp{
-            {"first", },
+            {"first", element.first.asString()},
             {"second", element.second.serialize()}
     };
 

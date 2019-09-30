@@ -772,16 +772,6 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
     };
 
 
-//                std::for_each(RS_verifier_witness_msg.begin(), RS_verifier_witness_msg.end(), [&](std::unique_ptr<TranscriptMessage>& element){
-//                    result["RS_verifier_witness_msg"].push_back(element.get()->serialization());
-//
-//                });
-
-
-
-//                std::for_each(RS_verifier_composition_msg.begin(), RS_verifier_composition_msg.end(), [&result](std::unique_ptr<TranscriptMessage> &&element){
-//                    result["RS_verifier_composition_msg"].push_back(element.get()->serialization()); });
-
 
     return result.dump();
     }
