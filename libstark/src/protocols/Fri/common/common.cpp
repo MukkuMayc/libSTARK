@@ -1,6 +1,7 @@
 #include "common.hpp"
 #include <algebraLib/SubspacePolynomial.hpp>
 #include "serialize_funfunc.hpp"
+#include "../../Ali/common_details/serialization_fun.h"
 namespace libstark{
 namespace Protocols{
 namespace Fri{
@@ -75,6 +76,14 @@ vector<FieldElement> getColumnBasis(const vector<FieldElement>& L, const bool L0
             {"dataQueries", dataQueries.serialize()}
     };
 };
+
+    std::string proverResponce_t::serialization() {
+        nlohmann::json result = {
+                {"proofConstructionQueries", VecOfBufferToStr(proofConstructionComitments)},
+                {"dataQueries", dataResults.serialize()}
+        };
+    }
+
 
 
 

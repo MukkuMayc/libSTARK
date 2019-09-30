@@ -51,6 +51,7 @@ class verifierRequest_t : public TranscriptMessage{
 
 class proverResponce_t : public TranscriptMessage{
     public:
+        std::string serialization() override;
         std::vector<CryptoCommitment::hashDigest_t> proofConstructionComitments;
         rawResults_t dataResults;
 };

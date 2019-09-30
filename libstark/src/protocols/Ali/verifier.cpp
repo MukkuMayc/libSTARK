@@ -713,49 +713,49 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
         return Str;
 
     }
-    std::string boundeg (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
-        std::string Str="";
-        for (int i=0; i<RandomCo.boundary.size();i++) {
-            Str += std::to_string(RandomCo.boundary[i].degShift);
-        }
-        return Str;
-    }
-    std::string bounUncoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo){
-        std::string Str="";
-        for (int i=0; i<RandomCo.boundary.size();i++) {
-            Str+= VecToStr(RandomCo.boundary[i].coeffUnshifted);
-        }
-        return Str;
-    }
-    std::string bouncoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
-        std::string Str="";
-        for (int i=0; i<RandomCo.boundary.size();i++) {
-            Str+= VecToStr(RandomCo.boundary[i].coeffShifted);
-        }
-        return Str;
-    }
-//ZK_mask....
-    std::string ZKdeg (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
-        std::string Str="";
-        for (int i=0; i<RandomCo.ZK_mask_composition.size();i++) {
-            Str += std::to_string(RandomCo.ZK_mask_composition[i].degShift);
-        }
-        return Str;
-    }
-    std::string ZKUncoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo){
-        std::string Str="";
-        for (int i=0; i<RandomCo.ZK_mask_composition.size();i++) {
-            Str+= VecToStr(RandomCo.ZK_mask_composition[i].coeffUnshifted);
-        }
-        return Str;
-    }
-    std::string Zkcoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
-        std::string Str="";
-        for (int i=0; i<RandomCo.ZK_mask_composition.size();i++) {
-            Str+= VecToStr(RandomCo.ZK_mask_composition[i].coeffShifted);
-        }
-        return Str;
-    }
+//    std::string boundeg (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
+//        std::string Str="";
+//        for (int i=0; i<RandomCo.boundary.size();i++) {
+//            Str += std::to_string(RandomCo.boundary[i].degShift);
+//        }
+//        return Str;
+//    }
+//    std::string bounUncoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo){
+//        std::string Str="";
+//        for (int i=0; i<RandomCo.boundary.size();i++) {
+//            Str+= VecToStr(RandomCo.boundary[i].coeffUnshifted);
+//        }
+//        return Str;
+//    }
+//    std::string bouncoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
+//        std::string Str="";
+//        for (int i=0; i<RandomCo.boundary.size();i++) {
+//            Str+= VecToStr(RandomCo.boundary[i].coeffShifted);
+//        }
+//        return Str;
+//    }
+////ZK_mask....
+//    std::string ZKdeg (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
+//        std::string Str="";
+//        for (int i=0; i<RandomCo.ZK_mask_composition.size();i++) {
+//            Str += std::to_string(RandomCo.ZK_mask_composition[i].degShift);
+//        }
+//        return Str;
+//    }
+//    std::string ZKUncoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo){
+//        std::string Str="";
+//        for (int i=0; i<RandomCo.ZK_mask_composition.size();i++) {
+//            Str+= VecToStr(RandomCo.ZK_mask_composition[i].coeffUnshifted);
+//        }
+//        return Str;
+//    }
+//    std::string Zkcoeff (libstark::Protocols::Ali::details::randomCoeffsSet_t RandomCo) {
+//        std::string Str="";
+//        for (int i=0; i<RandomCo.ZK_mask_composition.size();i++) {
+//            Str+= VecToStr(RandomCo.ZK_mask_composition[i].coeffShifted);
+//        }
+//        return Str;
+//    }
  //JSON Serialization
     std::string libstark::Protocols::Ali::details::verifierMsg::serialization()  {
     nlohmann::json result = {
