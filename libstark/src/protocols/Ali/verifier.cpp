@@ -729,11 +729,11 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
 //                }},
                 {"coeffsPi", VecOfVecOfALFEToStr(coeffsPi)},
                 {"coeffsChi", VecOfVecOfALFEToStr(coeffsChi)},
-//                {"queries", {
-//                                                {"boundary", VecOfSetOfUintToStr(queries.boundary)},
-//                                                {"boundaryPolyMatrix", SetToStr(queries.boundaryPolysMatrix)},
-//                                                {"ZK_mask_composition", VecOfSetOfUintToStr(queries.ZK_mask_composition)}
-//                }}
+                {"queries", {
+                                                {"boundary", VecOfSetOfUintToStr(queries.boundary)},
+                                                {"boundaryPolyMatrix", SetToStr(queries.boundaryPolysMatrix)},
+                                                {"ZK_mask_composition", VecOfSetOfUintToStr(queries.ZK_mask_composition)}
+                }}
     };
 
     std::for_each(randomCoefficients.boundary.begin(), randomCoefficients.boundary.end(), [&result] (randomCoeefs &x) {

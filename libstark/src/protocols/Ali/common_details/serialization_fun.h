@@ -16,15 +16,10 @@
 #ifndef LIBSTARK_SERIALIZATION_FUN_H
 #define LIBSTARK_SERIALIZATION_FUN_H
 
-std::string VecOfBufferToStr(std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t> Vector);
-std::string commitmentsToStr(std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t> Vector);
-std::string results_boundaryToStr(std::vector<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> Vector);
-std::string results_boundaryPolToStr(std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t> Vector);
-std::string results_ZKMToStr(std::vector<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> Vector);
+nlohmann::json VecOfBufferToStr(std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t> Vector);
 
-std::string RS_prover_witness_msgToStr();
-std::string RS_prover_composition_msgToStr();
-//serialization for RS_prover_witness_msg, RS_prover_composition_msg in libSTARK/libstark/src/protocols/protocol.cpp
+nlohmann::json results_boundaryToStr(std::vector<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> Vector);
+
 
 
 

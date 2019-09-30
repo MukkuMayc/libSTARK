@@ -929,23 +929,24 @@ Ali::details::rawResults_t prover_t::answerQueries(const Ali::details::rawQuerie
     return fillResults(state_, *fftInstance_, *(instance_[0]), queries, entireWitnessKept_, numRS_repetitions_);
 }
 
-//        std::string libstark::Protocols::Ali::details::proverMsg::serialization()  {
-//            nlohmann::json result = {
-//                    {"commitments", commitmentsToStr(details::proverMsg::commitments)},
-//                    {"results", {
-//                                        {"boundary", results_boundaryToStr(Ali::details::proverMsg::results.boundary)},
-//                                        {"boundaryPolysMatrix", results_boundaryPolToStr(Ali::details::proverMsg::results.boundaryPolysMatrix)},
-//                                        {"ZK_mask_composition", results_ZKMToStr(Ali::details::proverMsg::results.ZK_mask_composition)}
-//                    },
-//
-//                    }}
-//
-//
-//            return result.dump();
-//        }
 
 
 } // namespace Prover
+std::string details::proverMsg::serialization()  {
+    nlohmann::json result = {
+            {"commitments", VecOfBufferToStr(details::proverMsg::commitments)},
+            {"results", {
+                                    {"boundary", results_boundaryToStr(results.boundary)},
+                                    {"boundaryPolysMatrix", VecOfBufferToStr(results.boundaryPolysMatrix)},
+                                    {"ZK_mask_composition", results_boundaryToStr(results.ZK_mask_composition)}
+                            },
+
+            }};
+
+
+    return result.dump();
+}
+
 } // namespace Ali
 } // namespace Protocols
 } // namespace libstark

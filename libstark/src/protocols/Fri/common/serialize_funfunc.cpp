@@ -15,13 +15,13 @@ nlohmann::json  ddSetToStr(std::set<unsigned long long> Set) {
 nlohmann::json ddVecToStr(std::vector<Algebra::FieldElement> Vector) {
 
     nlohmann::json Str = nlohmann::json::array();
-//        std::string Str = "[";
+
     if (!Vector.empty()) {
         for (int i = 0; i < Vector.size(); i++) {
             Str.push_back(nlohmann::json::parse(Vector[i].asString()));
         }
     }
-//        Str += "]";
+
     return Str;
 }
 nlohmann::json ddVecOfVecOfALFEToStr(std::vector<std::vector<Algebra::FieldElement>> Vector) {

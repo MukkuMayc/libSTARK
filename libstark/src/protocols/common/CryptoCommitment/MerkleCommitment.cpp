@@ -163,14 +163,18 @@ hashDigest_t hash(void const* const src){
 
 std::string hashDigest_t::toString()const{
     std::stringstream stream;
+    stream << "[";
     stream << std::hex;
     
     short* shortsBuff = (short*)&buffer;
     for(unsigned short i=0; i< sizeof(hashDigest_t)/sizeof(short); i++){
-        stream << std::setfill('0')<< std::setw(sizeof(short)*2) << shortsBuff[i] <<" ";
+        stream << "\""<<std::setfill('0')<< std::setw(sizeof(short)*2) << shortsBuff[i] << "\""<<",";
     }
-
-    return stream.str();
+    std::string tmp = stream.str();
+    if (tmp[tmp.size() - 1] == ',')
+        tmp.pop_back();
+    tmp += "]";
+    return tmp;
 }
 
 bool operator==(const hashDigest_t& a, const hashDigest_t& b){

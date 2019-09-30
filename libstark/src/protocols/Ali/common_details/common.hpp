@@ -69,11 +69,11 @@ public:
 class proverMsg : public TranscriptMessage{
 public:
     virtual ~proverMsg(){};
+    std::string serialization() override;
     std::vector<CryptoCommitment::hashDigest_t> commitments;
     Ali::details::rawResults_t results;
     std::vector<std::unique_ptr<TranscriptMessage>> RS_prover_witness_msg;
     std::vector<std::unique_ptr<TranscriptMessage>> RS_prover_composition_msg;
-//    std::string serialization() override;
 };
 
 namespace PCP_common {
