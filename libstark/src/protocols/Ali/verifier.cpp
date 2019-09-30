@@ -665,21 +665,15 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
 } // namespace Verifier
 
     std::string VecToStr(std::vector<Algebra::FieldElement> Vector) {
-        std::ostringstream oss;
-        oss << "[";
-        if (!Vector.empty())
-        {
-            // Convert all but the last element to avoid a trailing ","
-            std::copy(Vector.begin(), Vector.end()-1,
-                      std::ostream_iterator<Algebra::FieldElement>(oss, ","));
-
-            // Now add the last element with no delimiter
-            oss << Vector.back().asString();
-            oss.str().pop_back();
-
+        std::string Str = "[";
+        if (!Vector.empty()) {
+            for (int i = 0; i < Vector.size() - 1; i++) {
+                Str += Vector[i].asString() + ", ";
+            }
+            Str += Vector[Vector.size() - 1].asString();
         }
-        oss << "]";
-        return oss.str();
+        Str += "]";
+        return Str;
     }
     std::string VecOfVecOfALFEToStr(std::vector<std::vector<Algebra::FieldElement>> Vector) {
         std::string Str = "[";
@@ -694,14 +688,17 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
         return Str;
     }
     std::string SetToStr(std::set<unsigned long long> Set) {
-        std::ostringstream stream;
-        stream << "[";
+        std::string Str = "[";
         if (!Set.empty()) {
-            std::copy(Set.begin(), Set.end(), std::ostream_iterator<unsigned long long>(stream, ","));
-            stream.str().pop_back();
+            std::for_each(Set.begin(), Set.end(), [&Str] (const unsigned long long &x) {
+
+                Str += std::to_string(x) + ", ";
+            });
+            Str.pop_back();
+            Str.pop_back();
         }
-        stream << "]";
-        return stream.str();
+        Str += "]";
+        return Str;
     }
     std::string VecOfSetOfUintToStr(std::vector<std::set<unsigned long long>> Vector) {
 
