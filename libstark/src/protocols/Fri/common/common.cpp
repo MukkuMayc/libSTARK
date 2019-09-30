@@ -2,6 +2,7 @@
 #include <algebraLib/SubspacePolynomial.hpp>
 #include "serialize_funfunc.hpp"
 #include "../../Ali/common_details/serialization_fun.h"
+
 namespace libstark{
 namespace Protocols{
 namespace Fri{
@@ -69,11 +70,34 @@ vector<FieldElement> getColumnBasis(const vector<FieldElement>& L, const bool L0
     return data;
 };
 
+    template<typename T>
+    nlohmann::json state_t<T>::serialize1() {
+        nlohmann::json data = {
+                {"localState", VecOfBufferToStr(localState)}
+        };
+        std::for_each(subproofs.begin(), subproofs.end(), [&data] (std::pair<const Algebra::FieldElement, libstark::Protocols::Fri::common::state_t<rawResult_t>> &element) {
+            nlohmann::json tmp{
+                    {"first", nlohmann::json::parse(element.first.asString())},
+                    {"second", element.second.serialize1()}
+            };
 
-    nlohmann::json verifierRequest_t::serialization1() {
+            data["subproofs"].push_back(tmp);
+        });
+        return data;
+    };
+
+nlohmann::json verifierRequest_t::serialization1() {
     nlohmann::json result = {
             {"proofConstructionQueries", ddVecOfVecOfALFEToStr(proofConstructionQueries)},
             {"dataQueries", dataQueries.serialize()}
+    };
+    return result;
+};
+
+nlohmann::json proverResponce_t::serialization1() {
+    nlohmann::json result = {
+            {"proofConstructionComitments", VecOfBufferToStr(proofConstructionComitments)},
+            {"dataResults", dataResults.serialize1()}
     };
     return result;
 };

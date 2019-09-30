@@ -31,6 +31,7 @@ template<typename T>
 class state_t{
 public:
     nlohmann::json serialize();
+    nlohmann::json serialize1();
 
     T localState;
     std::map<Algebra::FieldElement, state_t<T> , Algebra::classCompElements> subproofs;
@@ -51,7 +52,7 @@ class verifierRequest_t : public TranscriptMessage{
 
 class proverResponce_t : public TranscriptMessage{
     public:
-//        std::string serialization() override;
+        nlohmann::json serialization1() override;
         std::vector<CryptoCommitment::hashDigest_t> proofConstructionComitments;
         rawResults_t dataResults;
 };

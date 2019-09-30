@@ -943,6 +943,15 @@ std::string details::proverMsg::serialization()  {
 
             }};
 
+    std::for_each(RS_prover_witness_msg.begin(), RS_prover_witness_msg.end(), [&result] (std::unique_ptr<TranscriptMessage> &x) {
+        nlohmann::json tmp{x.get()->serialization1()};
+        result["RS_prover_witness_msg"] = tmp;
+    });
+
+    std::for_each(RS_prover_composition_msg.begin(), RS_prover_composition_msg.end(), [&result] (std::unique_ptr<TranscriptMessage> &x) {
+        nlohmann::json tmp{x.get()->serialization1()};
+        result["RS_prover_composition_msg"] = tmp;
+    });
 
     return result.dump();
 }
