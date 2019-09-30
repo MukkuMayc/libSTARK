@@ -153,7 +153,7 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
             startVerifier();
             const auto vMsg = verifier.sendMessage();
             auto vMsg_ptr = vMsg.get();
-            std::cout << static_cast<Ali::details::verifierMsg*>(vMsg_ptr)->serialization() << std::endl;
+            std::cout << vMsg_ptr->serialization() << std::endl;
             verifierTime += t.getElapsed();
             t = Timer();
 

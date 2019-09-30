@@ -666,7 +666,7 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
 
     std::string VecToStr(std::vector<Algebra::FieldElement> Vector) {
         std::ostringstream oss;
-
+        oss << "[";
         if (!Vector.empty())
         {
             // Convert all but the last element to avoid a trailing ","
@@ -674,27 +674,43 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
                       std::ostream_iterator<Algebra::FieldElement>(oss, ","));
 
             // Now add the last element with no delimiter
-            oss << Vector.back();
+            oss << Vector.back().asString();
+
         }
+        oss << "]";
         return oss.str();
     }
     std::string VecOfVecOfALFEToStr(std::vector<std::vector<Algebra::FieldElement>> Vector) {
-        std::string Str = "";
-        for (int i=0; i<Vector.size(); i++) {
-            Str+= VecToStr(Vector[i]);
+        std::string Str = "[";
+        if (!Vector.empty()) {
+            for (int i = 0; i < Vector.size() - 1; i++) {
+                Str += VecToStr(Vector[i]) + ", ";
+            }
+
+            Str += VecToStr(Vector[Vector.size() - 1]);
         }
+        Str += "]";
         return Str;
     }
     std::string SetToStr(std::set<unsigned long long> Set) {
         std::ostringstream stream;
-        std::copy(Set.begin(), Set.end(), std::ostream_iterator<unsigned long long>(stream, ","));
+        stream << "[";
+        if (!Set.empty()) {
+            std::copy(Set.begin(), Set.end(), std::ostream_iterator<unsigned long long>(stream, ","));
+        }
+        stream << "]";
         return stream.str();
     }
     std::string VecOfSetOfUintToStr(std::vector<std::set<unsigned long long>> Vector) {
-        std::string Str = "";
-        for (int i=0; i<Vector.size(); i++) {
-            Str+= SetToStr(Vector[i]);
+
+        std::string Str = "[";
+        if (!Vector.empty()) {
+            for (int i = 0; i < Vector.size() - 1; i++) {
+                Str += SetToStr(Vector[i]) + ", ";
+            }
+            Str += SetToStr(Vector[Vector.size() - 1]);
         }
+        Str += "]";
         return Str;
 
     }
@@ -745,23 +761,23 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
     std::string libstark::Protocols::Ali::details::verifierMsg::serialization()  {
     nlohmann::json result = {
                 {"numRepetitions", std::to_string(numRepetitions)},
-                {"randomCoefficients",  {
-                                                {"boundary", {
-                                                                     {"degShift", boundeg(randomCoefficients)},
-                                                                     {"coeffUnshifted", bounUncoeff(randomCoefficients)},
-                                                                     {"coeffShifted", bouncoeff(randomCoefficients)}
-                                                }},
+//                {"randomCoefficients",  {
+//                                                {"boundary", {
+//                                                                     {"degShift", boundeg(randomCoefficients)},
+//                                                                     {"coeffUnshifted", bounUncoeff(randomCoefficients)},
+//                                                                     {"coeffShifted", bouncoeff(randomCoefficients)}
+//                                                }},
                                                 {"boundaryPolyMatrix", {
                                                                      {"degShift", std::to_string(randomCoefficients.boundaryPolysMatrix.degShift)},
                                                                      {"coeffUnshifted", VecToStr(randomCoefficients.boundaryPolysMatrix.coeffUnshifted)},
                                                                      {"coeffShifted", VecToStr(randomCoefficients.boundaryPolysMatrix.coeffShifted)}
                                                 }},
-                                                {"ZK_mask_composition", {
-                                                                      {"degShift", ZKdeg(randomCoefficients)},
-                                                                      {"coeffUnshifted", ZKUncoeff(randomCoefficients)},
-                                                                      {"coeffShifted", Zkcoeff(randomCoefficients)}
-                                                }}
-                }},
+//                                                {"ZK_mask_composition", {
+//                                                                      {"degShift", ZKdeg(randomCoefficients)},
+//                                                                      {"coeffUnshifted", ZKUncoeff(randomCoefficients)},
+//                                                                      {"coeffShifted", Zkcoeff(randomCoefficients)}
+//                                                }}
+//                }},
                 {"coeffsPi", VecOfVecOfALFEToStr(coeffsPi)},
                 {"coeffsChi", VecOfVecOfALFEToStr(coeffsChi)},
                 {"queries", {
@@ -771,9 +787,26 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
                 }}
     };
 
+    std::for_each(randomCoefficients.boundary.begin(), randomCoefficients.boundary.end(), [&result] (randomCoeefs &x) {
+        nlohmann::json rCoeef = {
+            {"degShift", std::to_string(x.degShift)},
+            {"coeffUnshifted", VecToStr(x.coeffUnshifted)},
+            {"coeffShifted",VecToStr(x.coeffShifted)}
+        };
+        result["randomCoefficients"]["boundary"].push_back(rCoeef.dump());
+    });
+
+     std::for_each(randomCoefficients.ZK_mask_composition.begin(), randomCoefficients.ZK_mask_composition.end(), [&result] (randomCoeefs &x) {
+         nlohmann::json rCoeef = {
+                 {"degShift", std::to_string(x.degShift)},
+                 {"coeffUnshifted", VecToStr(x.coeffUnshifted)},
+                 {"coeffShifted",VecToStr(x.coeffShifted)}
+         };
+         result["randomCoefficients"]["ZK_mask_composition"].push_back(rCoeef.dump());
+     });
 
 
-    return result.dump();
+     return result.dump();
     }
 
 } // namespace Ali
