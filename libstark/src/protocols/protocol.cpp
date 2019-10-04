@@ -163,6 +163,72 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
             std::cout << pMsg->serialization() << std::endl;
             proverTime += t.getElapsed();
 
+
+
+
+
+            //try to deserialized
+            nlohmann::json parcedStr = nlohmann::json::parse(pMsg->serialization());
+            bool isTRUE = (parcedStr.find("commitments") != parcedStr.end());
+            bool isTRUE1 = (parcedStr.find("results") != parcedStr.end());
+            bool isTRUE2 = (parcedStr.find("RS_prover_witness_msg") != parcedStr.end());
+            bool isTRUE3 = (parcedStr.find("RS_prover_composition_msg") != parcedStr.end());
+            std::cout<<isTRUE<<"---"<<isTRUE1<<"---"<<isTRUE2<<"---"<<isTRUE3<<"---"<<std::endl;
+
+//            auto CommitmentsParced=[];
+//            auto ResultsZKMaskParced=[];
+//            auto ResultsBoundaryParced=[];
+//            auto ResultsBoundaryPolyParced=[];
+//            auto RSwitnessParced=[];
+//            auto RSCompositionParced=[];
+
+
+
+            //HELP FUN
+
+            if  (isTRUE) {
+                auto CommitmentsParced = parcedStr["commitments"].get<nlohmann::json::array_t>();
+                std::cout<<CommitmentsParced<<std::endl;
+                std::vector<CryptoCommitment::hashDigest_t> commitments;
+
+                for( int i=0; i<CommitmentsParced.size(); i++) {
+                    CryptoCommitment::hashDigest_t buffer;
+
+                    for (int y=0; y<CommitmentsParced[i].size();y++) {
+
+                        std::cout << std::string(CommitmentsParced[i][y]) << std::endl;
+                        std::string buff = CommitmentsParced[i][y];
+                        strcpy(buffer.buffer, buff.c_str());
+                        std::cout<<buffer.buffer<<"bufferbufferbuffer"<<std::endl;
+
+
+                    }
+
+
+                    std::cout<<CommitmentsParced[i]<<std::endl;
+                    std::cout<<CommitmentsParced.size()<<std::endl;
+                }
+
+            }
+            if (isTRUE1) {
+                auto ResultsZKMaskParced = parcedStr["results"]["ZK_mask_composition"].get<nlohmann::json::array_t>();
+                std::cout<<ResultsZKMaskParced<<std::endl;
+                auto ResultsBoundaryParced = parcedStr["results"]["boundary"].get<nlohmann::json::array_t>();
+                std::cout<<ResultsBoundaryParced<<std::endl;
+                auto ResultsBoundaryPolyParced = parcedStr["results"]["boundaryPolysMatrix"].get<nlohmann::json::array_t>();
+                std::cout<<ResultsBoundaryPolyParced<<std::endl;
+            }
+            if (isTRUE2) {
+                auto RSwitnessParced = parcedStr["RS_prover_witness_msg"].get<nlohmann::json::array_t>();
+                std::cout<<RSwitnessParced<<std::endl;
+            }
+            if (isTRUE3) {
+                auto RSCompositionParced = parcedStr["RS_prover_composition_msg"].get<nlohmann::json::array_t>();
+                std::cout<<RSCompositionParced<<std::endl;
+            }
+
+
+
             {
                 doStatusLoop = false;
                 // barManager.join();

@@ -27,6 +27,7 @@ public:
 virtual ~TranscriptMessage(){};
 virtual std::string serialization() {};
 virtual nlohmann::json serialization1() {};
+virtual std::string deserialization() {};
 };
 
 typedef std::unique_ptr<TranscriptMessage> msg_ptr_t;

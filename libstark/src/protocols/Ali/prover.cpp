@@ -956,6 +956,12 @@ std::string details::proverMsg::serialization()  {
     return result.dump();
 }
 
+std::string details::proverMsg::deserialization() {
+    nlohmann::json proverMessageCommitments = nlohmann::json::parse({"commitments"});
+    std::cout<<proverMessageCommitments<<std::endl;
+};
+
+
 } // namespace Ali
 } // namespace Protocols
 } // namespace libstark

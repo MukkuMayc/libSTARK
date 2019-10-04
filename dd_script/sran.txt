@@ -15,7 +15,6 @@ struct:
 	randomCoeffsSet_t randomCoefficients;(set)
 		- boundary (vector<T_univariate>)
 		- boundaryPolyMatrix (T_unvariante)
-		- ZK_mask_boundary (T_univariate) --doesn't use
     	- ZK_mask_composition (vector<T_univariate>)
    		//T_univariate --шаблон = uniEvalView_t
    		------------------------------------------------

@@ -70,6 +70,7 @@ class proverMsg : public TranscriptMessage{
 public:
     virtual ~proverMsg(){};
     std::string serialization() override;
+    std::string deserialization() override;
     std::vector<CryptoCommitment::hashDigest_t> commitments;
     Ali::details::rawResults_t results;
     std::vector<std::unique_ptr<TranscriptMessage>> RS_prover_witness_msg;
