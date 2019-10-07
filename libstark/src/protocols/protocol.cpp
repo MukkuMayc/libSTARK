@@ -1,5 +1,4 @@
 #include "protocol.hpp"
-#include "common/Utils/TaskReporting.hpp"
 #include "common/Utils/Timing.hpp"
 #include "common/Utils/specsPrint.hpp"
 #include "languages/Acsp/AcspWitnessChecker.hpp"
@@ -7,9 +6,7 @@
 #include "protocols/Ali/prover.hpp"
 #include "protocols/Ali/verifier.hpp"
 #include "reductions/BairToAcsp/BairToAcsp.hpp"
-#include "protocols/Ali/common_details/common.hpp"
 #include <iostream>
-// #include <thread>
 
 namespace libstark {
 namespace Protocols {
@@ -51,8 +48,6 @@ void startVerification() { startColor(GREEN); }
 void startSpecs() { startColor(CYAN); }
 
 void startCicleCount() { startColor(WHITE); }
-
-
 
 std::string numBytesToString(uint64_t numBytes) {
     std::string suffix[] = {"Bytes",  "KBytes", "MBytes", "GBytes",
@@ -100,21 +95,6 @@ void printSpecs(const double proverTime, const double verifierTime,
     resetColor();
 }
 
-void printSpecsCSV(const double proverTime, const double verifierTime,
-                   const uint64_t proofGeneratedBytes,
-                   const uint64_t proofSentBytes, const uint64_t queriedDataBytes) {
-    return;
-    startSpecs();
-    std::cout << "Comma Separated Valued (CSV) specifications:" << std::endl;
-    std::cout << "Prover time (seconds), Verifier time (seconds), Proof size "
-                 "(Bytes), Proof sent (Bytes), Queried data (Bytes)"
-              << std::endl;
-    std::cout << proverTime << "," << verifierTime << "," << proofGeneratedBytes
-              << "," << proofSentBytes << "," << queriedDataBytes << std::endl;
-
-    resetColor();
-}
-
 }  // namespace
 
 bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
@@ -152,8 +132,7 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
 
             startVerifier();
             const auto vMsg = verifier.sendMessage();
-            auto vMsg_ptr = vMsg.get();
-           // std::cout << vMsg_ptr->serialization() << std::endl;
+           // std::cout << vMsg->serialization() << std::endl;
             verifierTime += t.getElapsed();
             t = Timer();
 
@@ -163,10 +142,7 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
             std::cout << pMsg->serialization() << std::endl;
             proverTime += t.getElapsed();
 
-
-
-
-
+            //--------------------------------------------------------------------------------------------------
             //try to deserialized
             nlohmann::json parcedStr = nlohmann::json::parse(pMsg->serialization());
             bool isTRUE = (parcedStr.find("commitments") != parcedStr.end());
@@ -221,29 +197,29 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                     results.boundaryPolysMatrix.push_back(buffer1);
                 }
             }
+            //need TODO
             if (isTRUE2) {
                 auto RSwitnessParced = parcedStr["RS_prover_witness_msg"].get<nlohmann::json::array_t>();
-//                std::cout<<RSwitnessParced<<std::endl;
+                //std::cout<<RSwitnessParced<<std::endl;
             }
+            //need TODO
             if (isTRUE3) {
                 auto RSCompositionParced = parcedStr["RS_prover_composition_msg"].get<nlohmann::json::array_t>();
-//                std::cout<<RSCompositionParced<<std::endl;
+                //std::cout<<RSCompositionParced<<std::endl;
             }
-
+            //end deserialized
+            //-----------------------------------------------------------------------
 
 
             {
                 doStatusLoop = false;
-                // barManager.join();
                 std::cout << "(" << roundTimer.getElapsed() << " seconds)"
                           << std::endl;
             }
 
             t = Timer();
-
             startVerifier();
             verifier.receiveMessage(*pMsg);
-
             startCicleCount();
         }
     }
@@ -251,15 +227,11 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
     startVerification();
     const bool res = verifier.verify();
     verifierTime += t.getElapsed();
-    std::cout << "Verifier decision: " << (res ? "ACCEPT" : "REJECT")
-              << std::endl;
+    std::cout << "Verifier decision: " << (res ? "ACCEPT" : "REJECT")<< std::endl;
 
     resetColor();
-
     printSpecs(proverTime, verifierTime, proofGeneratedBytes, proofSentBytes,
                queriedDataBytes);
-    printSpecsCSV(proverTime, verifierTime, proofGeneratedBytes, proofSentBytes,
-                  queriedDataBytes);
     return res;
 }
 
