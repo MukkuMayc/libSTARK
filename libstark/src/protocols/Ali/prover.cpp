@@ -958,7 +958,7 @@ std::string details::proverMsg::serialization()  {
 
 std::string details::proverMsg::deserialization() {
     nlohmann::json proverMessageCommitments = nlohmann::json::parse({"commitments"});
-    std::cout<<proverMessageCommitments<<std::endl;
+//    std::cout<<proverMessageCommitments<<std::endl;
 };
 
 

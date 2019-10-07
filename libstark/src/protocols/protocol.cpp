@@ -173,58 +173,61 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
             bool isTRUE1 = (parcedStr.find("results") != parcedStr.end());
             bool isTRUE2 = (parcedStr.find("RS_prover_witness_msg") != parcedStr.end());
             bool isTRUE3 = (parcedStr.find("RS_prover_composition_msg") != parcedStr.end());
-            std::cout<<isTRUE<<"---"<<isTRUE1<<"---"<<isTRUE2<<"---"<<isTRUE3<<"---"<<std::endl;
-
-//            auto CommitmentsParced=[];
-//            auto ResultsZKMaskParced=[];
-//            auto ResultsBoundaryParced=[];
-//            auto ResultsBoundaryPolyParced=[];
-//            auto RSwitnessParced=[];
-//            auto RSCompositionParced=[];
-
-
 
             //HELP FUN
-
+            std::vector<CryptoCommitment::hashDigest_t> commitments;
+            Ali::details::rawResults_t results;
+            //done
             if  (isTRUE) {
                 auto CommitmentsParced = parcedStr["commitments"].get<nlohmann::json::array_t>();
-                std::cout<<CommitmentsParced<<std::endl;
-                std::vector<CryptoCommitment::hashDigest_t> commitments;
-
                 for( int i=0; i<CommitmentsParced.size(); i++) {
-                    CryptoCommitment::hashDigest_t buffer;
-
-                    for (int y=0; y<CommitmentsParced[i].size();y++) {
-
-                        std::cout << std::string(CommitmentsParced[i][y]) << std::endl;
-                        std::string buff = CommitmentsParced[i][y];
-                        strcpy(buffer.buffer, buff.c_str());
-                        std::cout<<buffer.buffer<<"bufferbufferbuffer"<<std::endl;
-
-
+                    CryptoCommitment::hashDigest_t buffer1;
+                    std::string buff = base64_decode(CommitmentsParced[i]);
+                    buff.copy(buffer1.buffer, buff.length());
+                    commitments.push_back(buffer1);
+                }
+            }
+            //done
+            if (isTRUE1) {
+                auto ResultsBoundaryParced = parcedStr["results"]["boundary"].get<nlohmann::json::array_t>();
+                for (int i=0;i<ResultsBoundaryParced.size();i++){
+                    std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t> boundary1;
+                    for (int j=0; j<ResultsBoundaryParced[i].size();j++) {
+                        CryptoCommitment::hashDigest_t buffer1;
+                        std::string buff = base64_decode(ResultsBoundaryParced[i][j]);
+                        buff.copy(buffer1.buffer, buff.length());
+                        boundary1.push_back(buffer1);
                     }
-
-
-                    std::cout<<CommitmentsParced[i]<<std::endl;
-                    std::cout<<CommitmentsParced.size()<<std::endl;
+                    results.ZK_mask_composition.push_back(boundary1);
                 }
 
-            }
-            if (isTRUE1) {
                 auto ResultsZKMaskParced = parcedStr["results"]["ZK_mask_composition"].get<nlohmann::json::array_t>();
-                std::cout<<ResultsZKMaskParced<<std::endl;
-                auto ResultsBoundaryParced = parcedStr["results"]["boundary"].get<nlohmann::json::array_t>();
-                std::cout<<ResultsBoundaryParced<<std::endl;
+                for (int i=0;i<ResultsZKMaskParced.size();i++){
+                    std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t> ZK_mask_composition1;
+                    for (int j=0; j<ResultsZKMaskParced[i].size();j++) {
+                        CryptoCommitment::hashDigest_t buffer1;
+                        std::string buff = base64_decode(ResultsZKMaskParced[i][j]);
+                        buff.copy(buffer1.buffer, buff.length());
+                        ZK_mask_composition1.push_back(buffer1);
+                    }
+                    results.ZK_mask_composition.push_back(ZK_mask_composition1);
+                }
+
                 auto ResultsBoundaryPolyParced = parcedStr["results"]["boundaryPolysMatrix"].get<nlohmann::json::array_t>();
-                std::cout<<ResultsBoundaryPolyParced<<std::endl;
+                for(auto & i : ResultsBoundaryPolyParced) {
+                    CryptoCommitment::hashDigest_t buffer1;
+                    std::string buff = base64_decode(i);
+                    buff.copy(buffer1.buffer, buff.length());
+                    results.boundaryPolysMatrix.push_back(buffer1);
+                }
             }
             if (isTRUE2) {
                 auto RSwitnessParced = parcedStr["RS_prover_witness_msg"].get<nlohmann::json::array_t>();
-                std::cout<<RSwitnessParced<<std::endl;
+//                std::cout<<RSwitnessParced<<std::endl;
             }
             if (isTRUE3) {
                 auto RSCompositionParced = parcedStr["RS_prover_composition_msg"].get<nlohmann::json::array_t>();
-                std::cout<<RSCompositionParced<<std::endl;
+//                std::cout<<RSCompositionParced<<std::endl;
             }
 
 

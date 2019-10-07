@@ -6,6 +6,7 @@
 #include <cstring>
 #include <map>
 #include <set>
+#include "./../../../../../cbase64.h"
 
 namespace libstark{
 namespace Protocols{
@@ -14,7 +15,10 @@ namespace CryptoCommitment{
 struct hashDigest_t{
     char buffer[128/8];
     
-    std::string toString()const;
+    std::string toString() const;
+    std::string toString1() const;
+
+//    std::string toString1() const;
 };
 
 bool operator==(const hashDigest_t& a, const hashDigest_t& b);

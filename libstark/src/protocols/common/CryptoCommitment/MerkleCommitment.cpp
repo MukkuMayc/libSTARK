@@ -1,13 +1,12 @@
 #include "MerkleCommitment.hpp"
 #include "common/Infrastructure/Infrastructure.hpp"
 #include "common/Utils/ErrorHandling.hpp"
-// #include <omp.h>
 #include <string>
 #include <algebraLib/FieldElement.hpp>
-#include <iomanip>
-
 #include "simd-functions.cpp"
 #include "aes_functions.cpp"
+#define CBASE64_IMPLEMENTATION
+#include "./../../../../../cbase64.h"
 #define _MM_SHUFFLE(z,y,x,w) (z << 6) | (y <<4) | (x << 2) | w
 
 namespace libstark{
@@ -161,21 +160,30 @@ hashDigest_t hash(void const* const src){
     return res;
 }
 
-std::string hashDigest_t::toString()const{
-    std::stringstream stream;
-    stream << "[";
-    stream << std::hex;
-    
-    short* shortsBuff = (short*)&buffer;
-    for(unsigned short i=0; i< sizeof(hashDigest_t)/sizeof(short); i++){
-        stream << "\""<<std::setfill('0')<< std::setw(sizeof(short)*2) << shortsBuff[i] << "\""<<",";
-    }
-    std::string tmp = stream.str();
-    if (tmp[tmp.size() - 1] == ',')
-        tmp.pop_back();
-    tmp += "]";
-    return tmp;
-}
+//std::string hashDigest_t::toString()const{
+//    std::stringstream stream;
+//    stream << "[";
+//    stream << std::hex;
+//
+//    short* shortsBuff = (short*)&buffer;
+//    for(unsigned short i=0; i< sizeof(hashDigest_t)/sizeof(short); i++){
+////        stream << "\""<<std::setfill('0')<< std::setw(sizeof(short)*2) << shortsBuff[i] << "\""<<",";
+//        stream << "\""<<shortsBuff[i] << "\""<<",";
+//    }
+//    std::string tmp = stream.str();
+//    if (tmp[tmp.size() - 1] == ',')
+//        tmp.pop_back();
+//    tmp += "]";
+//    return tmp;
+//}
+//
+std::string hashDigest_t::toString() const{
+
+    auto out = base64_encode(buffer, 16);
+    return out;
+};
+
+
 
 bool operator==(const hashDigest_t& a, const hashDigest_t& b){
     return 0 == std::memcmp(&a,&b,sizeof(hashDigest_t));

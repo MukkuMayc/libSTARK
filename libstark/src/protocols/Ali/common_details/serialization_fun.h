@@ -12,7 +12,7 @@
 #include <algebraLib/FieldElement.hpp>
 #include <algebraLib/PolynomialDegree.hpp>
 #include <vector>
-
+#include "./../../../../../cbase64.h"
 #ifndef LIBSTARK_SERIALIZATION_FUN_H
 #define LIBSTARK_SERIALIZATION_FUN_H
 

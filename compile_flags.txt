@@ -1,1 +1,1 @@
--std=c++11 -fmessage-length=0 -O3
+-std=c++11 -fmessage-length=0 -O0 -g -fpermissive
