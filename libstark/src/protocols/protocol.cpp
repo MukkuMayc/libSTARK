@@ -150,9 +150,10 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
             bool isTRUE2 = (parcedStr.find("RS_prover_witness_msg") != parcedStr.end());
             bool isTRUE3 = (parcedStr.find("RS_prover_composition_msg") != parcedStr.end());
 
-            //HELP FUN
+            //create anf fill prover Msg field
             std::vector<CryptoCommitment::hashDigest_t> commitments;
             Ali::details::rawResults_t results;
+            libstark::Protocols::Fri::common::proverResponce_t proverMsg1;
             //done
             if  (isTRUE) {
                 auto CommitmentsParced = parcedStr["commitments"].get<nlohmann::json::array_t>();
@@ -176,7 +177,6 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                     }
                     results.ZK_mask_composition.push_back(boundary1);
                 }
-
                 auto ResultsZKMaskParced = parcedStr["results"]["ZK_mask_composition"].get<nlohmann::json::array_t>();
                 for (int i=0;i<ResultsZKMaskParced.size();i++){
                     std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t> ZK_mask_composition1;
@@ -188,7 +188,6 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                     }
                     results.ZK_mask_composition.push_back(ZK_mask_composition1);
                 }
-
                 auto ResultsBoundaryPolyParced = parcedStr["results"]["boundaryPolysMatrix"].get<nlohmann::json::array_t>();
                 for(auto & i : ResultsBoundaryPolyParced) {
                     CryptoCommitment::hashDigest_t buffer1;
@@ -197,11 +196,28 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                     results.boundaryPolysMatrix.push_back(buffer1);
                 }
             }
+
             //need TODO
             if (isTRUE2) {
                 auto RSwitnessParced = parcedStr["RS_prover_witness_msg"].get<nlohmann::json::array_t>();
-                //std::cout<<RSwitnessParced<<std::endl;
+                for (int i=0; i<RSwitnessParced.size();i++) {
+                    libstark::Protocols::Fri::common::proverResponce_t RsProver;
+                    nlohmann::json parcedRSw = nlohmann::json::parse(RSwitnessParced[i].dump());
+                    //take element from RS_witness and fill proofConstructionComitments field in proverResponce_t
+                    auto RSProofConstrParsed = parcedRSw["proofConstructionComitments"];
+                    for(auto & i : RSProofConstrParsed) {
+                        CryptoCommitment::hashDigest_t buffer1;
+                        std::string buff = base64_decode(i);
+                        buff.copy(buffer1.buffer, buff.length());
+                        proverMsg1.proofConstructionComitments.push_back(buffer1);
+                    }
+                    auto RSDataResultsParsed = parcedRSw["dataResults"];
+                    for(auto & i : RSDataResultsParsed) {
+                        //here need to deserialized dataResults
+                    }
+               }
             }
+
             //need TODO
             if (isTRUE3) {
                 auto RSCompositionParced = parcedStr["RS_prover_composition_msg"].get<nlohmann::json::array_t>();
