@@ -97,6 +97,50 @@ void printSpecs(const double proverTime, const double verifierTime,
 
 }  // namespace
 
+
+
+
+        //create anf fill prover Msg field
+        std::vector<CryptoCommitment::hashDigest_t> commitments;
+        Ali::details::rawResults_t results;
+        libstark::Protocols::Fri::common::proverResponce_t proverMsg1;
+
+
+
+void dataResults1(nlohmann::json &Element ) {
+    bool isTRUE5 = (Element.find("localState") != Element.end());
+    if (isTRUE5) {
+        auto RSLocalStateParsed = Element["localState"];
+        for(auto & i : RSLocalStateParsed) {
+            CryptoCommitment::hashDigest_t buffer1;
+            std::string buff = base64_decode(i);
+            buff.copy(buffer1.buffer, buff.length());
+            proverMsg1.dataResults.localState.push_back(buffer1);
+        }
+    }
+    bool isTrue6 = (Element.find("subproofs") != Element.end());
+    if (isTrue6) {
+        FFF::Element ALFE;
+        auto RSSubproofsParced = Element["subproofs"];
+        for (int i=0; i<RSSubproofsParced.size();i++) {
+            bool isTrue7 = (RSSubproofsParced[i].find("first") != RSSubproofsParced[i].end());
+            if (isTrue7) {
+                auto RSSubproofsFirstParced = RSSubproofsParced[i]["first"];
+
+                    ALFE.c[0]=RSSubproofsFirstParced;
+            }
+            bool isTrue8 = (RSSubproofsParced[i].find("second") != RSSubproofsParced[i].end());
+            if (isTrue8) {
+                auto RSSubproofsSecondParced = RSSubproofsParced[i]["second"];
+                dataResults1(RSSubproofsSecondParced);
+            }
+//            proverMsg1.dataResults.subproofs.insert(ALFE, proverMsg1.dataResults);
+        }
+
+    }
+
+
+};
 bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                      const bool onlyVerifierData) {
     double verifierTime = 0;
@@ -150,10 +194,7 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
             bool isTRUE2 = (parcedStr.find("RS_prover_witness_msg") != parcedStr.end());
             bool isTRUE3 = (parcedStr.find("RS_prover_composition_msg") != parcedStr.end());
 
-            //create anf fill prover Msg field
-            std::vector<CryptoCommitment::hashDigest_t> commitments;
-            Ali::details::rawResults_t results;
-            libstark::Protocols::Fri::common::proverResponce_t proverMsg1;
+
             //done
             if  (isTRUE) {
                 auto CommitmentsParced = parcedStr["commitments"].get<nlohmann::json::array_t>();
@@ -212,9 +253,10 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                         proverMsg1.proofConstructionComitments.push_back(buffer1);
                     }
                     auto RSDataResultsParsed = parcedRSw["dataResults"];
-                    for(auto & i : RSDataResultsParsed) {
+                    dataResults1(RSDataResultsParsed);
+
                         //here need to deserialized dataResults
-                    }
+
                }
             }
 

@@ -51,9 +51,9 @@ add_library(${PROJECT_NAME}
         src/protocols/Fri/common/serialize_funfunc.hpp src/protocols/Ali/common_details/serialization_fun.cpp src/protocols/Ali/common_details/serialization_fun.h src/protocols/Fri/common/deserialized_fun.cpp src/protocols/Fri/common/deserialized_fun.h)
 
 file(READ ../compile_flags.txt COMPILE_FLAGS)
-file(READ ../link_flags.txt    LINK_FLAGS)
+file(READ ../link_flags.txt LINK_FLAGS)
 separate_arguments(COMPILE_FLAGS NATIVE_COMMAND ${COMPILE_FLAGS})
-separate_arguments(LINK_FLAGS    NATIVE_COMMAND ${LINK_FLAGS})
+separate_arguments(LINK_FLAGS NATIVE_COMMAND ${LINK_FLAGS})
 
 target_compile_options(${PROJECT_NAME} PUBLIC ${COMPILE_FLAGS})
 target_link_options(${PROJECT_NAME} PUBLIC ${LINK_FLAGS})
@@ -61,4 +61,4 @@ target_link_options(${PROJECT_NAME} PUBLIC ${LINK_FLAGS})
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 
-target_link_libraries(${PROJECT_NAME}  ${LIBS})
+target_link_libraries(${PROJECT_NAME} ${LIBS})

@@ -17,23 +17,29 @@ namespace Algebra {
 		return s << a.asString();
 	}
 
-	std::string FieldElement::asString() const{
-		::std::stringstream s;
-		s << "[";
-        uint64_t elem=element_.c[0];
-        bool first = true;
-        while(elem != 0){
-            if(!first){
-                s<<",";
-            }
-            s<<(elem & 1);
-            elem>>=1;
+    std::string FieldElement::asString() const{
+        ::std::stringstream s;
+        s <<element_.c[0];
+        return s.str();
+    }
 
-            first = false;
-        }
-        s <<"]";
-		return s.str();
-	}
+//	std::string FieldElement::asString() const{
+//		::std::stringstream s;
+//		s << "[";
+//        uint64_t elem=element_.c[0];
+//        bool first = true;
+//        while(elem != 0){
+//            if(!first){
+//                s<<",";
+//            }
+//            s<<(elem & 1);
+//            elem>>=1;
+//
+//            first = false;
+//        }
+//        s <<"]";
+//		return s.str();
+//	}
 
 
 elementsSet_t getStandartBasis(const unsigned short basisSize){
