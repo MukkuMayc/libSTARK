@@ -8,6 +8,7 @@
 #include "reductions/BairToAcsp/BairToAcsp.hpp"
 #include <iostream>
 
+
 namespace libstark {
 namespace Protocols {
 
@@ -107,7 +108,9 @@ void printSpecs(const double proverTime, const double verifierTime,
 
 
 
-void dataResults1(nlohmann::json &Element ) {
+//void dataResults1(nlohmann::json &Element ) {
+libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> dataResults1(nlohmann::json &Element ) {
+    //deserialized dataResults.localState
     bool isTRUE5 = (Element.find("localState") != Element.end());
     if (isTRUE5) {
         auto RSLocalStateParsed = Element["localState"];
@@ -118,29 +121,35 @@ void dataResults1(nlohmann::json &Element ) {
             proverMsg1.dataResults.localState.push_back(buffer1);
         }
     }
+    //deserialized dataResults.subproofs
     bool isTrue6 = (Element.find("subproofs") != Element.end());
+    std::pair<Algebra::FieldElement, libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>>> tmp_pair;
+    Algebra::FieldElement ALFE;
+    libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> second1;
     if (isTrue6) {
-        FFF::Element ALFE;
+
         auto RSSubproofsParced = Element["subproofs"];
         for (int i=0; i<RSSubproofsParced.size();i++) {
+            //for each subproofs desertialized first
             bool isTrue7 = (RSSubproofsParced[i].find("first") != RSSubproofsParced[i].end());
             if (isTrue7) {
                 auto RSSubproofsFirstParced = RSSubproofsParced[i]["first"];
-
-                    ALFE.c[0]=RSSubproofsFirstParced;
+                ALFE=Algebra::mapIntegerToFieldElement(0,64,RSSubproofsFirstParced);
             }
+            //for each subproofs try to desertialized second
             bool isTrue8 = (RSSubproofsParced[i].find("second") != RSSubproofsParced[i].end());
             if (isTrue8) {
                 auto RSSubproofsSecondParced = RSSubproofsParced[i]["second"];
-                dataResults1(RSSubproofsSecondParced);
+                second1 = dataResults1(RSSubproofsSecondParced);
             }
-//            proverMsg1.dataResults.subproofs.insert(ALFE, proverMsg1.dataResults);
         }
-
     }
-
-
+    proverMsg1.dataResults.subproofs.clear();
+    proverMsg1.dataResults.subproofs.insert(std::pair<Algebra::FieldElement, libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>>>(ALFE, second1));
+    return proverMsg1.dataResults;
 };
+
+
 bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                      const bool onlyVerifierData) {
     double verifierTime = 0;
