@@ -685,7 +685,7 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
         }
         return Str;
     }
-    std::string SetToStr(std::set<unsigned long long> Set) {
+    nlohmann::json SetToStr(std::set<unsigned long long> Set) {
         nlohmann::json Str = nlohmann::json::array();
         if (!Set.empty()) {
             std::for_each(Set.begin(), Set.end(), [&Str] (const unsigned long long &x) {
@@ -695,7 +695,7 @@ uint64_t verifier_t::expectedQueriedDataBytes()const{
         }
         return Str;
     }
-    std::string VecOfSetOfUintToStr(std::vector<std::set<unsigned long long>> Vector) {
+    nlohmann::json VecOfSetOfUintToStr(std::vector<std::set<unsigned long long>> Vector) {
 
         nlohmann::json Str = nlohmann::json::array();
         if (!Vector.empty()) {

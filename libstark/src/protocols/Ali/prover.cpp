@@ -907,6 +907,8 @@ msg_ptr_t prover_t::sendMessage(){
     return pMsgPtr;
 }
 
+
+
 void prover_t::evaluateBoundryPolys(const unsigned int numRepetitions){
     state_.boundaryPolysMatrix = boundaryPolysEvaluation(*(instance_[0]),witness_,numRepetitions,fftInstance_,entireWitnessKept_, numRS_repetitions_);
 }

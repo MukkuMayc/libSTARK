@@ -104,6 +104,17 @@ Ali::details::rawResults_t results;
 libstark::Protocols::Fri::common::proverResponce_t RSProverWitess1;
 libstark::Protocols::Fri::common::proverResponce_t RSProverComposition1;
 
+//create and fill verifier Msg fields
+unsigned int numRepetitions1;
+Ali::details::randomCoeffsSet_t randomCoefficients1;
+std::vector<std::vector<Algebra::FieldElement>> coeffsPi1;
+std::vector<Algebra::FieldElement> Coeffspivec1;
+std::vector<std::vector<Algebra::FieldElement>> coeffsChi1;
+std::vector<Algebra::FieldElement> CoeffsChivec1;
+Ali::details::rawQueries_t queries1;
+std::vector<std::unique_ptr<TranscriptMessage>> RS_verifier_witness_msg1;
+std::vector<std::unique_ptr<TranscriptMessage>> RS_verifier_composition_msg1;
+
 //fun to deserialized dataResults
 libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> dataResults1(nlohmann::json &Element ) {
     //deserialized dataResults.localState
@@ -145,7 +156,7 @@ libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::Crypt
 };
 
 //fun to deserialized dataResults RS_prover_cpmposition
-        libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> dataResults2(nlohmann::json &Element ) {
+libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> dataResults2(nlohmann::json &Element ) {
             //deserialized dataResults.localState
             bool isTRUE5 = (Element.find("localState") != Element.end());
             if (isTRUE5) {
@@ -218,18 +229,80 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
 
             startVerifier();
             const auto vMsg = verifier.sendMessage();
-           // std::cout << vMsg->serialization() << std::endl;
+            std::cout << vMsg->serialization() << std::endl;
             verifierTime += t.getElapsed();
             t = Timer();
+
+//            try to deserialized verifier message
+//-----------------------------------------------------------------------------------------------------------
+            nlohmann::json parsedWitness = nlohmann::json::parse(vMsg->serialization());
+            //done
+            bool isWTRUE = (parsedWitness.find("numRepetitions") != parsedWitness.end());
+            if(isWTRUE) {
+                auto numRepetitionsPRS = parsedWitness["numRepetitions"];
+                numRepetitions1 = std::stoul((const std::string) numRepetitionsPRS,0,0);
+            }
+                //TODO this shit
+//            bool isWTRUE1 = (parsedWitness.find("randomCoefficients") != parsedWitness.end());
+//            if (isWTRUE1) {
+//                auto randomCoeffsPRS = parsedWitness["randomCoefficients"];
+//                //check boundary
+////                std::cout<<"---------------------------"<<std::endl;
+////                std::cout<<randomCoeffsPRS<<std::endl;
+////                std::cout<<"---------------------------"<<std::endl;
+//                //check boundaryPolysMatrix
+//                if (randomCoeffsPRS.find("boundaryPolysMatrix") != randomCoeffsPRS.end()){
+//                    auto randomCoeefsBoundaryPolysPRS = randomCoeffsPRS["boundaryPolysMatrix"];
+//                        std::cout<<randomCoeefsBoundaryPolysPRS<<std::endl;
+//                    }
+//
+//                //ZK_mask_composition
+//                if (parsedWitness.find("ZK_mask_composition") != parsedWitness.end()){
+//
+//                }
+//
+//            }
+            //done
+            bool isWTRUE2 = (parsedWitness.find("coeffsPi") != parsedWitness.end());
+            if (isWTRUE2) {
+                auto ceffsPiPRS = parsedWitness["coeffsPi"];
+                for (int i=0; i<ceffsPiPRS.size();i++) {
+                    for ( int j=0; j<ceffsPiPRS[i].size();j++) {
+                        Coeffspivec1.push_back(Algebra::mapIntegerToFieldElement(0,64,ceffsPiPRS[i][j]));
+                    }
+                    coeffsPi1.push_back(Coeffspivec1);
+                }
+            }
+            //done
+            bool isWTRUE3 = (parsedWitness.find("coeffsChi") != parsedWitness.end());
+            if (isWTRUE2) {
+                auto ceffsChiPRS = parsedWitness["coeffsChi"];
+                for (int i=0; i<ceffsChiPRS.size();i++) {
+                    for ( int j=0; j<ceffsChiPRS[i].size();j++) {
+                        CoeffsChivec1.push_back(Algebra::mapIntegerToFieldElement(0,64,ceffsChiPRS[i][j]));
+                    }
+                    coeffsChi1.push_back(CoeffsChivec1);
+                }
+            }
+            
+            bool isWTRUE4 = (parsedWitness.find("queries") != parsedWitness.end());
+            bool isWTRUE5 = (parsedWitness.find("RS_verifier_witness_msg") != parsedWitness.end());
+            bool isWTRUE6 = (parsedWitness.find("RS_verifier_composition_msg") != parsedWitness.end());
+
+//-----------------------------------------------------------------------------------------------------------
+//            end of deserialized verifier message
+
+
+
 
             startProver();
             prover.receiveMessage(*vMsg);
             const auto pMsg = prover.sendMessage();
-            std::cout << pMsg->serialization() << std::endl;
+//            std::cout << pMsg->serialization() << std::endl;
             proverTime += t.getElapsed();
 
             //--------------------------------------------------------------------------------------------------
-            //try to deserialized
+            //deserialized prover message
             nlohmann::json parcedStr = nlohmann::json::parse(pMsg->serialization());
             bool isTRUE = (parcedStr.find("commitments") != parcedStr.end());
             bool isTRUE1 = (parcedStr.find("results") != parcedStr.end());
@@ -246,7 +319,7 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                     commitments.push_back(buffer1);
                 }
             }
-            //done
+
             if (isTRUE1) {
                 auto ResultsBoundaryParced = parcedStr["results"]["boundary"].get<nlohmann::json::array_t>();
                 for (int i=0;i<ResultsBoundaryParced.size();i++){
@@ -257,7 +330,7 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                         buff.copy(buffer1.buffer, buff.length());
                         boundary1.push_back(buffer1);
                     }
-                    results.ZK_mask_composition.push_back(boundary1);
+                    results.boundary.push_back(boundary1);
                 }
                 auto ResultsZKMaskParced = parcedStr["results"]["ZK_mask_composition"].get<nlohmann::json::array_t>();
                 for (int i=0;i<ResultsZKMaskParced.size();i++){
@@ -278,7 +351,7 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                     results.boundaryPolysMatrix.push_back(buffer1);
                 }
             }
-            //done
+
             if (isTRUE2) {
                 auto RSwitnessParced = parcedStr["RS_prover_witness_msg"].get<nlohmann::json::array_t>();
                 for (int i=0; i<RSwitnessParced.size();i++) {
@@ -297,7 +370,6 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                }
             }
 
-            //need TODO
             if (isTRUE3) {
                 auto RSCompositionParced = parcedStr["RS_prover_composition_msg"].get<nlohmann::json::array_t>();
                 for (int i=0; i<RSCompositionParced.size();i++) {
@@ -315,7 +387,13 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                     dataResults2(RSDataResultsParsed);
                 }
             }
-            //end deserialized
+            //here need to collect prover message
+//            libstark::Protocols::Ali::details::proverMsg::results = results;
+//            libstark::Protocols::Ali::details::proverMsg::commitments = commitments;
+//            libstark::Protocols::Ali::details::proverMsg::RS_prover_composition_msg.push_back(RSProverComposition1);
+//            libstark::Protocols::Ali::details::proverMsg::RS_prover_witness_msg.push_back(RSProverWitess1);
+
+            //end deserialized prover message
             //-----------------------------------------------------------------------
 
 

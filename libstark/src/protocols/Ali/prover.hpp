@@ -62,6 +62,7 @@ private:
     std::vector<Algebra::FieldElement> computeUnivariateForRS_Proximity_Witness(const Ali::details::randomCoeffsSet_t& randCoeffs, const unsigned int rsCombId)const;
     std::vector<Algebra::FieldElement> computeUnivariateForRS_Proximity_Composition(const Ali::details::randomCoeffsSet_t& randCoeffs, const unsigned int rsCombId)const;
     Ali::details::rawResults_t answerQueries(const Ali::details::rawQueries_t& queries);
+
 };
 
 
