@@ -1,21 +1,16 @@
 #ifndef RS_IOPP_BIASED_COMMON
 #define RS_IOPP_BIASED_COMMON
-
 #include "protocols/protocol.hpp"
 #include "protocols/common/queries.hpp"
-
 #include <algebraLib/FieldElement.hpp>
 #include <map>
 #include "../../../../../libSTARK/json.hpp"
 #include "serialize_funfunc.hpp"
 
-
 namespace libstark{
 namespace Protocols{
 namespace Fri{
 namespace common{
-
-
 
 std::vector<Algebra::FieldElement> getL0Basis(const std::vector<Algebra::FieldElement>& L, const bool L0isMSB);
 std::vector<Algebra::FieldElement> getL1Basis(const std::vector<Algebra::FieldElement>& L, const bool L0isMSB);

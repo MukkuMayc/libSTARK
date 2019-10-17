@@ -98,17 +98,13 @@ void printSpecs(const double proverTime, const double verifierTime,
 
 }  // namespace
 
+//create anf fill prover Msg field
+std::vector<CryptoCommitment::hashDigest_t> commitments;
+Ali::details::rawResults_t results;
+libstark::Protocols::Fri::common::proverResponce_t RSProverWitess1;
+libstark::Protocols::Fri::common::proverResponce_t RSProverComposition1;
 
-
-
-        //create anf fill prover Msg field
-        std::vector<CryptoCommitment::hashDigest_t> commitments;
-        Ali::details::rawResults_t results;
-        libstark::Protocols::Fri::common::proverResponce_t proverMsg1;
-
-
-
-//void dataResults1(nlohmann::json &Element ) {
+//fun to deserialized dataResults
 libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> dataResults1(nlohmann::json &Element ) {
     //deserialized dataResults.localState
     bool isTRUE5 = (Element.find("localState") != Element.end());
@@ -118,12 +114,11 @@ libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::Crypt
             CryptoCommitment::hashDigest_t buffer1;
             std::string buff = base64_decode(i);
             buff.copy(buffer1.buffer, buff.length());
-            proverMsg1.dataResults.localState.push_back(buffer1);
+            RSProverWitess1.dataResults.localState.push_back(buffer1);
         }
     }
     //deserialized dataResults.subproofs
     bool isTrue6 = (Element.find("subproofs") != Element.end());
-    std::pair<Algebra::FieldElement, libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>>> tmp_pair;
     Algebra::FieldElement ALFE;
     libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> second1;
     if (isTrue6) {
@@ -144,11 +139,49 @@ libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::Crypt
             }
         }
     }
-    proverMsg1.dataResults.subproofs.clear();
-    proverMsg1.dataResults.subproofs.insert(std::pair<Algebra::FieldElement, libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>>>(ALFE, second1));
-    return proverMsg1.dataResults;
+    RSProverWitess1.dataResults.subproofs.clear();
+    RSProverWitess1.dataResults.subproofs.insert(std::pair<Algebra::FieldElement, libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>>>(ALFE, second1));
+    return RSProverWitess1.dataResults;
 };
 
+//fun to deserialized dataResults RS_prover_cpmposition
+        libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> dataResults2(nlohmann::json &Element ) {
+            //deserialized dataResults.localState
+            bool isTRUE5 = (Element.find("localState") != Element.end());
+            if (isTRUE5) {
+                auto RSLocalStateParsed = Element["localState"];
+                for(auto & i : RSLocalStateParsed) {
+                    CryptoCommitment::hashDigest_t buffer1;
+                    std::string buff = base64_decode(i);
+                    buff.copy(buffer1.buffer, buff.length());
+                    RSProverComposition1.dataResults.localState.push_back(buffer1);
+                }
+            }
+            //deserialized dataResults.subproofs
+            bool isTrue6 = (Element.find("subproofs") != Element.end());
+            Algebra::FieldElement ALFE;
+            libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>> second1;
+            if (isTrue6) {
+                auto RSSubproofsParced = Element["subproofs"];
+                for (int i=0; i<RSSubproofsParced.size();i++) {
+                    //for each subproofs desertialized first
+                    bool isTrue7 = (RSSubproofsParced[i].find("first") != RSSubproofsParced[i].end());
+                    if (isTrue7) {
+                        auto RSSubproofsFirstParced = RSSubproofsParced[i]["first"];
+                        ALFE=Algebra::mapIntegerToFieldElement(0,64,RSSubproofsFirstParced);
+                    }
+                    //for each subproofs try to desertialized second
+                    bool isTrue8 = (RSSubproofsParced[i].find("second") != RSSubproofsParced[i].end());
+                    if (isTrue8) {
+                        auto RSSubproofsSecondParced = RSSubproofsParced[i]["second"];
+                        second1 = dataResults2(RSSubproofsSecondParced);
+                    }
+                }
+            }
+            RSProverComposition1.dataResults.subproofs.clear();
+            RSProverComposition1.dataResults.subproofs.insert(std::pair<Algebra::FieldElement, libstark::Protocols::Fri::common::state_t<std::vector<libstark::Protocols::CryptoCommitment::hashDigest_t>>>(ALFE, second1));
+            return RSProverComposition1.dataResults;
+        };
 
 bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                      const bool onlyVerifierData) {
@@ -203,7 +236,6 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
             bool isTRUE2 = (parcedStr.find("RS_prover_witness_msg") != parcedStr.end());
             bool isTRUE3 = (parcedStr.find("RS_prover_composition_msg") != parcedStr.end());
 
-
             //done
             if  (isTRUE) {
                 auto CommitmentsParced = parcedStr["commitments"].get<nlohmann::json::array_t>();
@@ -246,12 +278,10 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                     results.boundaryPolysMatrix.push_back(buffer1);
                 }
             }
-
-            //need TODO
+            //done
             if (isTRUE2) {
                 auto RSwitnessParced = parcedStr["RS_prover_witness_msg"].get<nlohmann::json::array_t>();
                 for (int i=0; i<RSwitnessParced.size();i++) {
-                    libstark::Protocols::Fri::common::proverResponce_t RsProver;
                     nlohmann::json parcedRSw = nlohmann::json::parse(RSwitnessParced[i].dump());
                     //take element from RS_witness and fill proofConstructionComitments field in proverResponce_t
                     auto RSProofConstrParsed = parcedRSw["proofConstructionComitments"];
@@ -259,20 +289,31 @@ bool executeProtocol(PartieInterface& prover, verifierInterface& verifier,
                         CryptoCommitment::hashDigest_t buffer1;
                         std::string buff = base64_decode(i);
                         buff.copy(buffer1.buffer, buff.length());
-                        proverMsg1.proofConstructionComitments.push_back(buffer1);
+                        RSProverWitess1.proofConstructionComitments.push_back(buffer1);
                     }
                     auto RSDataResultsParsed = parcedRSw["dataResults"];
+                    //deserialized dataResults
                     dataResults1(RSDataResultsParsed);
-
-                        //here need to deserialized dataResults
-
                }
             }
 
             //need TODO
             if (isTRUE3) {
                 auto RSCompositionParced = parcedStr["RS_prover_composition_msg"].get<nlohmann::json::array_t>();
-                //std::cout<<RSCompositionParced<<std::endl;
+                for (int i=0; i<RSCompositionParced.size();i++) {
+                    nlohmann::json parcedRSC = nlohmann::json::parse(RSCompositionParced[i].dump());
+                    //take element from RS_composition and fill proofConstructionComitments field in proverResponce_t
+                    auto RSProofConstrParsed = parcedRSC["proofConstructionComitments"];
+                    for(auto & i : RSProofConstrParsed) {
+                        CryptoCommitment::hashDigest_t buffer1;
+                        std::string buff = base64_decode(i);
+                        buff.copy(buffer1.buffer, buff.length());
+                        RSProverComposition1.proofConstructionComitments.push_back(buffer1);
+                    }
+                    auto RSDataResultsParsed = parcedRSC["dataResults"];
+                    //deserialized dataResults
+                    dataResults2(RSDataResultsParsed);
+                }
             }
             //end deserialized
             //-----------------------------------------------------------------------

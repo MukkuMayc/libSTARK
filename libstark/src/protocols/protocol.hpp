@@ -1,6 +1,5 @@
 #ifndef PROTOCOL_HPP__
 #define PROTOCOL_HPP__
-
 #include "languages/Bair/BairInstance.hpp"
 #include "languages/Bair/BairWitness.hpp"
 #include "languages/Acsp/AcspInstance.hpp"
@@ -14,14 +13,8 @@
 namespace libstark{
 namespace Protocols{
 
-//
-// There are many different ways  to define a generic protocol.
-//
-//
-
-//
 // Transcript data related types
-//
+
 class TranscriptMessage{
 public:
 virtual ~TranscriptMessage(){};
